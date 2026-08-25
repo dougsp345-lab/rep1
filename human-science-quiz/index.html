@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#782F40">
+  <title>Human Science Quiz — Ontology, Nosology, Virtue & Treatment</title>
+  <style>
+    :root{
+      --garnet:#782F40;
+      --garnet-dark:#5d2432;
+      --ink:#242424;
+      --muted:#62625f;
+      --paper:#fff;
+      --bg:#f5f3ef;
+      --line:#dedad3;
+      --good:#dff3e4;
+      --good-border:#3b7f4d;
+      --bad:#f8e2e2;
+      --bad-border:#a74444;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);min-height:100vh}
+    .wrap{width:min(100% - 28px,780px);margin:0 auto;padding:28px 0 52px}
+    header{margin-bottom:18px}
+    .eyebrow{font-size:.78rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--garnet);margin-bottom:7px}
+    h1{font-size:clamp(2rem,7vw,3.2rem);line-height:1.02;letter-spacing:-.035em;margin:0 0 10px}
+    .subtitle{margin:0;color:var(--muted);font-size:1rem;line-height:1.5;max-width:68ch}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:clamp(20px,5vw,34px);box-shadow:0 8px 28px rgba(0,0,0,.055)}
+    .meta{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px;font-size:.9rem;color:var(--muted)}
+    .pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#eee9e3;color:#4e4844;font-size:.78rem;font-weight:750}
+    .progress{height:7px;background:#ece8e2;border-radius:999px;overflow:hidden;margin:0 0 24px}
+    .progress > div{height:100%;width:0;background:var(--garnet);transition:width .2s ease}
+    h2{font-size:clamp(1.25rem,4.8vw,1.7rem);line-height:1.25;margin:0 0 20px}
+    .options{display:grid;gap:11px}
+    button{font:inherit}
+    .option{width:100%;text-align:left;border:1px solid #cbc7c0;background:#fff;border-radius:12px;padding:14px 15px;cursor:pointer;line-height:1.35;color:var(--ink)}
+    .option:hover:not(:disabled){border-color:var(--garnet);box-shadow:0 0 0 2px rgba(120,47,64,.08)}
+    .option:disabled{cursor:default;opacity:1}
+    .option.correct{background:var(--good);border-color:var(--good-border)}
+    .option.wrong{background:var(--bad);border-color:var(--bad-border)}
+    .feedback{display:none;margin-top:20px;border-left:4px solid var(--garnet);padding:12px 14px;background:#f7f4f0;border-radius:0 10px 10px 0;line-height:1.48}
+    .feedback strong{display:block;margin-bottom:5px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+    .primary,.secondary{border:0;border-radius:11px;padding:12px 16px;font-weight:760;cursor:pointer}
+    .primary{background:var(--garnet);color:#fff}
+    .primary:hover{background:var(--garnet-dark)}
+    .secondary{background:#e9e5df;color:var(--ink)}
+    .intro-list{margin:18px 0 24px;padding-left:21px;line-height:1.55}
+    .note{font-size:.86rem;color:var(--muted);line-height:1.45;margin-top:18px}
+    .score{font-size:clamp(2.4rem,12vw,4.8rem);font-weight:850;letter-spacing:-.05em;margin:4px 0}
+    .result-label{font-size:1.05rem;color:var(--muted);margin-bottom:22px}
+    .review{display:grid;gap:12px;margin-top:20px}
+    .review-item{border:1px solid var(--line);border-radius:12px;padding:14px;line-height:1.4}
+    .review-item b{display:block;margin-bottom:6px}
+    .tiny{font-size:.8rem;color:var(--muted)}
+    footer{font-size:.8rem;color:var(--muted);line-height:1.45;margin-top:16px;text-align:center}
+    a{color:var(--garnet)}
+    @media (max-width:520px){.meta{align-items:flex-start;flex-direction:column}.card{border-radius:14px}.wrap{width:min(100% - 18px,780px)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Human Science · Proof of Concept</div>
+      <h1>Ontology, Nosology, Virtue & Treatment</h1>
+      <p class="subtitle">A randomized quiz on the current Thomistic/metaphysical-realist Human Science framework: powers and operations, habits and virtues, passions, privations, and the logic of therapeutic redress.</p>
+    </header>
+
+    <main class="card" id="app"></main>
+
+    <footer>
+      Educational prototype based on the current working Human Science ontology/nosology. Treatment items test the conceptual framework; they are not stand-alone clinical protocols or individualized medical advice.
+    </footer>
+  </div>
+
+<script>
+const BANK = [
+  {
+    category:"Ontology",
+    q:"In this framework, what is a human capacity or power (potentia)?",
+    options:[
+      "A power ordered to a characteristic act and object",
+      "Any stable tendency acquired through repetition",
+      "Any conscious experience that occurs in the person",
+      "A statistical label for a cluster of behaviors"
+    ],
+    answer:0,
+    why:"A capacity is a power ordered to an act and object. Habits are stable dispositions of powers; they are not the powers themselves."
+  },
+  {
+    category:"Ontology",
+    q:"Which statement best captures the relationship between a capacity and a virtue?",
+    options:[
+      "Every intact capacity is already a virtue",
+      "A virtue is a good operative habit that perfects a power",
+      "A virtue is a separate power added alongside the natural capacities",
+      "Capacity and virtue are interchangeable names for the same reality"
+    ],
+    answer:1,
+    why:"A natural power is a remote principle of operation. Virtue is a good operative habit that disposes a relevant power to act well."
+  },
+  {
+    category:"Powers",
+    q:"Which internal sense unifies the deliverances of the external senses into one present perceptual field?",
+    options:["Imagination / phantasy","Memory / reminiscence","Common sense (sensus communis)","Cogitative power / particular reason"],
+    answer:2,
+    why:"The common sense integrates present sensory deliverances and supports awareness that one is sensing."
+  },
+  {
+    category:"Powers",
+    q:"A person can form, retain, and recombine a sensible image after the external object is gone. Which power is operating?",
+    options:["Possible intellect","Imagination / phantasy","Common sense","Irascible appetite"],
+    answer:1,
+    why:"Imagination or phantasy retains and manipulates phantasms after the external object is absent."
+  },
+  {
+    category:"Powers",
+    q:"A person immediately appraises a particular stranger as threatening, useful, friendly, or unfitting before reflective judgment fully evaluates the situation. Which power most directly supplies this concrete appraisal?",
+    options:["Cogitative power / particular reason","Agent intellect","Nutritive power","Will"],
+    answer:0,
+    why:"The cogitative power apprehends particular intentions or concrete significance: harmful, useful, friendly, threatening, fitting, and so forth."
+  },
+  {
+    category:"Powers",
+    q:"What distinguishes reminiscence from simple remembering in the current taxonomy?",
+    options:[
+      "Reminiscence concerns universals, while remembering concerns particulars",
+      "Reminiscence is a reason-guided search through memory for a past particular",
+      "Reminiscence is an external sense, while remembering is an internal sense",
+      "There is no distinction; they are separate names for exactly the same act"
+    ],
+    answer:1,
+    why:"Remembering is the return of a past particular; reminiscence is an active, reason-guided search for a past particular not immediately present."
+  },
+  {
+    category:"Powers",
+    q:"Which power makes phantasms actually intelligible by abstracting intelligible form from sensible images?",
+    options:["Agent intellect","Possible intellect","Cogitative power","Common sense"],
+    answer:0,
+    why:"The agent intellect makes what is potentially intelligible in phantasms actually intelligible for the possible intellect."
+  },
+  {
+    category:"Powers",
+    q:"Which power understands, judges, reasons, counsels, and in practical mode commands action?",
+    options:["Will / rational appetite","Possible intellect / reason","Irascible appetite","Locomotive power"],
+    answer:1,
+    why:"The possible intellect/reason receives intelligible form and performs understanding, judgment, reasoning, counsel, practical judgment, and command."
+  },
+  {
+    category:"Powers",
+    q:"How is free choice (liberum arbitrium) classified in this framework?",
+    options:[
+      "As a nineteenth capacity separate from the will",
+      "As an act of sensitive appetite",
+      "As the will choosing under reason, not a separate power",
+      "As another name for practical reason itself"
+    ],
+    answer:2,
+    why:"Free choice is not listed as a separate capacity beside will. Choice is an act of will under rational counsel and judgment."
+  },
+  {
+    category:"Passions",
+    q:"Which experiences are passions strictly speaking (passiones animae) in the framework?",
+    options:[
+      "Every passive reception whatsoever",
+      "Movements of the sensitive appetite with bodily alteration",
+      "Only acts of the will",
+      "Any thought that occurs without deliberate choice"
+    ],
+    answer:1,
+    why:"Strict passions are movements of the sensitive appetite with bodily alteration. Non-emotional reception is better called receptive actualization or passive operation."
+  },
+  {
+    category:"Passions",
+    q:"Which set belongs to the irascible rather than the concupiscible appetite?",
+    options:[
+      "Love, hatred, desire, aversion, pleasure, sorrow",
+      "Hope, despair, fear, daring, anger",
+      "Understanding, judgment, reasoning, command",
+      "Willing, consent, choice, use, fruition"
+    ],
+    answer:1,
+    why:"The irascible appetite concerns arduous good and evil and gives rise to hope, despair, fear, daring, and anger."
+  },
+  {
+    category:"Passions",
+    q:"A strong fear is present. Does intensity by itself make the fear disordered?",
+    options:[
+      "Yes; any intense passion is pathological",
+      "Yes; virtue always means weak passions",
+      "No; disorder depends on whether the passion departs from due object, end, circumstance, or measure",
+      "No; passions can never be disordered"
+    ],
+    answer:2,
+    why:"The relevant standard is due order and the mean of reason, not mere intensity. A strong passion can be fitting; a mild one can be inordinate."
+  },
+  {
+    category:"Virtue",
+    q:"What is an acquired virtue?",
+    options:[
+      "A natural power present before habituation",
+      "A virtue generated through repeated good acts under reason",
+      "A supernatural gift mechanically produced by behavioral practice",
+      "A temporary emotional state associated with acting well"
+    ],
+    answer:1,
+    why:"Acquired virtue is formed through repeated good acts under reason, disposing a power toward its connatural human good."
+  },
+  {
+    category:"Virtue",
+    q:"What is the most important limit on the idea that therapeutic drills can 'train virtue'?",
+    options:[
+      "Repeated acts cannot form any stable human habits",
+      "Only bodily powers can be trained",
+      "Drills may form acquired habits and virtues, but infused virtues and gifts are not manufactured by drills",
+      "Virtue has no relation at all to repeated action"
+    ],
+    answer:2,
+    why:"Repeated acts can form acquired habits and virtues. Infused virtues and gifts are given by grace; practice may dispose or express them but cannot manufacture them."
+  },
+  {
+    category:"Virtue",
+    q:"Which virtue is right reason about things to be done in concrete circumstances, including fitting counsel, judgment, and command?",
+    options:["Justice","Prudence","Temperance","Fortitude"],
+    answer:1,
+    why:"Prudence perfects practical reason concerning concrete action: right deliberation, judgment, and command toward a good end."
+  },
+  {
+    category:"Virtue",
+    q:"Which cardinal virtue principally perfects the will in rendering to each what is due?",
+    options:["Justice","Temperance","Fortitude","Studiousness"],
+    answer:0,
+    why:"Justice is the stable will to render to each what is due."
+  },
+  {
+    category:"Virtue",
+    q:"Which cardinal virtue principally orders the irascible appetite in relation to fear and daring?",
+    options:["Justice","Prudence","Fortitude","Temperance"],
+    answer:2,
+    why:"Fortitude firms the person against fear and moderates daring in remaining with reason's good amid grave difficulty."
+  },
+  {
+    category:"Virtue",
+    q:"Which cardinal virtue principally moderates the concupiscible appetite regarding pleasures of touch, especially food, drink, and sex?",
+    options:["Temperance","Justice","Fortitude","Wisdom"],
+    answer:0,
+    why:"Temperance principally moderates pleasures of touch according to reason."
+  },
+  {
+    category:"Nosology",
+    q:"What is privation (privatio) in the framework's most general nosological sense?",
+    options:[
+      "Any unusual trait compared with the population average",
+      "The absence of a due perfection in a subject capable of that perfection",
+      "A positive evil faculty competing with the good faculties",
+      "Only a consciously chosen vice"
+    ],
+    answer:1,
+    why:"Privation is the absence of a due good, perfection, order, or operation in a subject capable of it. This is the general metaphysical basis of disorder."
+  },
+  {
+    category:"Nosology",
+    q:"What is inordination (inordinatio)?",
+    options:[
+      "A failure of act, passion, habit, power, or end to conform to its due rule, measure, object, circumstance, or final cause",
+      "A lack of statistical normality regardless of function or end",
+      "The same thing as bodily disease and nothing more",
+      "The mere presence of a negative emotion"
+    ],
+    answer:0,
+    why:"Inordination names failure of due order. Excess, defect, wrong object, wrong circumstance, and wrong end are different ways of missing due order."
+  },
+  {
+    category:"Nosology",
+    q:"Someone has an intact natural power but has repeatedly formed a stable disposition toward acts contrary to reason. What is the most direct category for that stable disorder?",
+    options:["Vice","Sensory incapacity","Loss of the power itself","A strict passion"],
+    answer:0,
+    why:"A vice is a stable bad operative habit. This differs from damage to the capacity itself and from a transient passion or act."
+  },
+  {
+    category:"Nosology",
+    q:"Which statement is essential to keeping the nosology from moralizing every pathology?",
+    options:[
+      "Every disorder is a vice because all action involves a person",
+      "Every bodily or psychological privation is a sin",
+      "Moral fault requires sufficient knowledge and voluntariness; not every pathology is sin or vice",
+      "Only voluntary disorders deserve treatment"
+    ],
+    answer:2,
+    why:"The framework distinguishes natural defect, error, passion disorder, habit, and voluntary moral fault. Sin is used only where knowledge and voluntariness are sufficiently present."
+  },
+  {
+    category:"Treatment",
+    q:"A person's central problem is a recurrent false concrete appraisal of neutral cues as threatening. Which target and practice best match the current framework?",
+    options:[
+      "Cogitative appraisal — appraisal-correction drill",
+      "Nutritive power — measured-meal repetition",
+      "Agent intellect — abstraction drill",
+      "Justice — due-rendering drill"
+    ],
+    answer:0,
+    why:"Concrete threat/usefulness/fittingness appraisal belongs principally to the cogitative power; the proposed proximate practice is appraisal correction."
+  },
+  {
+    category:"Treatment",
+    q:"A person's main privation is ignorance or error in the possible intellect. Which proximate strategy does the current matrix pair with this?",
+    options:[
+      "Explicit instruction plus retrieval and application",
+      "Savor-and-stop practice",
+      "Graded tactile discrimination",
+      "Anger-delay-and-justice practice"
+    ],
+    answer:0,
+    why:"For ignorance or error, the matrix pairs brief explicit teaching with recall, application, correction, and repetition."
+  },
+  {
+    category:"Treatment",
+    q:"A person knows a due small good but repeatedly fails to choose it over a contrary impulse. Which locus and conceptual practice most directly fit?",
+    options:[
+      "Will / choice — choice-repetition drill",
+      "Sight — visual discrimination drill",
+      "Memory — spaced retrieval drill",
+      "Common sense — five-sense integration drill"
+    ],
+    answer:0,
+    why:"Weak or disordered choice belongs most directly to the will; the proposed primitive is repeated choice of a small due good at a defined cue."
+  },
+  {
+    category:"Treatment",
+    q:"If a privation is primarily organic — for example, a bodily incapacity that prevents due operation — what does the framework say about repetitive psychological drilling?",
+    options:[
+      "It is always sufficient if repeated intensely enough",
+      "It may be secondary; medical, material, environmental, or compensatory remedies may be primary",
+      "It should be avoided because bodily problems cannot affect psychological operation",
+      "It should be replaced by moral exhortation alone"
+    ],
+    answer:1,
+    why:"The framework explicitly distinguishes trainable operations from organic privations. Bodily disorders may require medical or material remedies rather than practice alone."
+  },
+  {
+    category:"Treatment",
+    q:"What is the best first move when constructing a treatment from this nosological framework?",
+    options:[
+      "Choose the most popular technique and apply it broadly",
+      "Identify the power or subject, its due act/good, the specific privation and cause, then choose a proximate remedy and auxiliary supports",
+      "Treat every symptom as a problem of motivation",
+      "Begin by strengthening all virtues simultaneously"
+    ],
+    answer:1,
+    why:"Therapeutic redress begins by locating what is actually lacking or disordered. The remedy should be matched to the locus and due perfection rather than selected generically."
+  },
+  {
+    category:"Treatment",
+    q:"What role does reinforcement or social support ordinarily play when it does not itself restore the missing due operation?",
+    options:["It is the definition of the cure","It is auxiliary support","It becomes a new human capacity","It proves that the original privation was voluntary"],
+    answer:1,
+    why:"The framework distinguishes proximate remedies from auxiliary supports. Reinforcement, environment, and social support may help restoration without themselves being the missing operation."
+  },
+  {
+    category:"Treatment",
+    q:"Which statement best captures the clinical status of the drill matrix itself?",
+    options:[
+      "Every listed drill is already an evidence-based treatment for every disorder at that locus",
+      "The matrix is a metaphysical and treatment-design coordinate system; proposed drills are conceptual primitives or hypotheses that must be integrated with appropriate evidence-based care",
+      "The matrix eliminates the need for diagnosis or clinical judgment",
+      "Only the virtue-related drills have any conceptual status"
+    ],
+    answer:1,
+    why:"The matrix explicitly cautions that a Thomistic nosology does not by itself establish clinical efficacy. The drills are design primitives, not universal stand-alone protocols."
+  },
+  {
+    category:"Virtue",
+    q:"How does continence differ from full temperance in the current virtue taxonomy?",
+    options:[
+      "Continence is bodily health, while temperance is an intellectual virtue",
+      "Continence holds to reason despite vehement disordered desire; temperance more fully harmonizes the appetite itself with reason",
+      "Continence is a theological virtue, while temperance is acquired only",
+      "There is no meaningful distinction"
+    ],
+    answer:1,
+    why:"Continence is good but imperfect relative to temperance: reason and will resist unruly desire even though the sensitive appetite is not yet fully harmonized."
+  },
+  {
+    category:"Treatment",
+    q:"A person fears a genuinely dangerous object in a proportionate way. Under this framework, should the fear automatically be extinguished?",
+    options:[
+      "Yes, because fear itself is a privation",
+      "Yes, because all treatment aims at emotional neutrality",
+      "No; fear has a proper good and should be ordered to reality and reason, not eliminated merely because it is unpleasant",
+      "No, because sensitive appetites cannot be shaped by reason"
+    ],
+    answer:2,
+    why:"Fear can be a fitting protective passion. Treatment seeks due order: neither excessive fear nor deficient fear, but a response proportionate to real danger and reason."
+  }
+];
+
+const app = document.getElementById('app');
+let quiz = [];
+let index = 0;
+let score = 0;
+let answers = [];
+
+function shuffle(arr){
+  const copy = [...arr];
+  for(let i=copy.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [copy[i],copy[j]]=[copy[j],copy[i]];
+  }
+  return copy;
+}
+
+function start(){
+  quiz = shuffle(BANK).slice(0,10);
+  index = 0;
+  score = 0;
+  answers = [];
+  renderQuestion();
+}
+
+function renderIntro(){
+  app.innerHTML = `
+    <div class="pill">10 randomized questions</div>
+    <h2 style="margin-top:14px">Test the architecture, not just vocabulary.</h2>
+    <p style="line-height:1.55;margin:0">Questions draw from six domains:</p>
+    <ul class="intro-list">
+      <li>ontology and the capacity–operation–habit distinction;</li>
+      <li>external and internal powers;</li>
+      <li>strict passions and rational acts;</li>
+      <li>virtues, vices, and habituation;</li>
+      <li>privation and inordination as nosological categories; and</li>
+      <li>matching a privation to a proximate remedy or auxiliary support.</li>
+    </ul>
+    <button class="primary" onclick="start()">Begin randomized quiz</button>
+    <p class="note">This prototype samples 10 items from a larger question bank each time. Answers are explained immediately, and missed items are summarized at the end.</p>
+  `;
+}
+
+function renderQuestion(){
+  const item = quiz[index];
+  const pct = (index / quiz.length) * 100;
+  app.innerHTML = `
+    <div class="meta">
+      <span>Question ${index+1} of ${quiz.length}</span>
+      <span class="pill">${item.category}</span>
+    </div>
+    <div class="progress"><div style="width:${pct}%"></div></div>
+    <h2>${item.q}</h2>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="actions" id="actions"></div>
+  `;
+  const box = document.getElementById('options');
+  item.options.forEach((text,i)=>{
+    const b=document.createElement('button');
+    b.className='option';
+    b.textContent=text;
+    b.onclick=()=>choose(i);
+    box.appendChild(b);
+  });
+}
+
+function choose(choice){
+  const item=quiz[index];
+  const correct=choice===item.answer;
+  if(correct) score++;
+  answers.push({item,choice,correct});
+  const buttons=[...document.querySelectorAll('.option')];
+  buttons.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===item.answer) b.classList.add('correct');
+    if(i===choice && i!==item.answer) b.classList.add('wrong');
+  });
+  const f=document.getElementById('feedback');
+  f.style.display='block';
+  f.innerHTML=`<strong>${correct ? 'Right.' : 'Not quite.'}</strong>${item.why}`;
+  document.getElementById('actions').innerHTML=`<button class="primary" onclick="next()">${index===quiz.length-1 ? 'See results' : 'Next question'}</button>`;
+}
+
+function next(){
+  index++;
+  if(index>=quiz.length) renderResults();
+  else renderQuestion();
+}
+
+function renderResults(){
+  const missed=answers.filter(a=>!a.correct);
+  const pct=Math.round((score/quiz.length)*100);
+  let label = pct===100 ? 'Perfect: the architecture is holding together.' : pct>=80 ? 'Strong grasp of the framework.' : pct>=60 ? 'Good start; review the missed distinctions.' : 'Worth another pass through the architecture.';
+  let review = missed.length ? missed.map(a=>`
+    <div class="review-item">
+      <b>${a.item.q}</b>
+      <div class="tiny">Correct answer</div>
+      <div>${a.item.options[a.item.answer]}</div>
+      <div class="tiny" style="margin-top:7px">Why</div>
+      <div>${a.item.why}</div>
+    </div>`).join('') : '<p>No missed items.</p>';
+  app.innerHTML=`
+    <div class="pill">Complete</div>
+    <div class="score">${score}/${quiz.length}</div>
+    <div class="result-label">${pct}% · ${label}</div>
+    <div class="actions">
+      <button class="primary" onclick="start()">New randomized quiz</button>
+      <button class="secondary" onclick="renderIntro()">Back to introduction</button>
+    </div>
+    <h2 style="margin-top:28px">Review missed items</h2>
+    <div class="review">${review}</div>
+  `;
+}
+
+renderIntro();
+</script>
+</body>
+</html>
