@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#20243a">
+  <meta name="description" content="A browser-based medieval learning adventure: master fourteen games, collect true and useful things, and rebuild a cathedral.">
+  <title>Cathedral: An Adventure of Learning</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="game-header">
+      <div class="brand-block">
+        <button id="titleButton" class="brand-button" type="button" aria-label="Open title screen">
+          <span class="brand-cross" aria-hidden="true">✠</span>
+          <span>
+            <strong>Cathedral</strong>
+            <small>An Adventure of Learning</small>
+          </span>
+        </button>
+      </div>
+      <div class="header-meters" aria-label="Game status">
+        <div class="meter-chip"><span>Cathedral</span><strong id="cathedralNumberLabel">I</strong></div>
+        <div class="meter-chip"><span>Offered</span><strong id="offeredLabel">0 / 1000</strong></div>
+        <div class="meter-chip"><span>Carried</span><strong id="carriedLabel">0</strong></div>
+      </div>
+    </header>
+
+    <nav class="main-nav" aria-label="Main game screens">
+      <button class="nav-button" data-screen="world" type="button">World</button>
+      <button class="nav-button" data-screen="cathedral" type="button">Cathedral</button>
+      <button class="nav-button" data-screen="maps" type="button">Maps</button>
+      <button class="nav-button" data-screen="collection" type="button">Collection</button>
+      <button class="nav-button" data-screen="save" type="button">Save</button>
+    </nav>
+
+    <main id="screen" class="screen" tabindex="-1"><section class="panel"><h1>Opening Cathedral…</h1><p>Preparing the adventure.</p></section></main>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <div id="modalRoot"></div>
+
+  <noscript>This game requires JavaScript.</noscript>
+  <script src="loader.js"></script>
+</body>
+</html>
