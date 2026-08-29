@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16324f">
+  <title>Math Mastery</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #173042;
+      --muted: #637381;
+      --line: #dbe4e8;
+      --paper: #ffffff;
+      --wash: #f4f8f8;
+      --blue: #176b87;
+      --blue-dark: #0f526a;
+      --green: #21845b;
+      --green-soft: #e8f6ee;
+      --red: #ad3d3d;
+      --red-soft: #fff0ef;
+      --gold: #e5a82f;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--ink); background: var(--wash); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #82cbe1; outline-offset: 2px; }
+    .shell { width: min(1120px, 100%); margin: auto; padding: 20px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 18px; }
+    .brand h1 { margin: 0; font-size: clamp(1.45rem, 4vw, 2rem); letter-spacing: -.03em; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: .92rem; }
+    .stats { display: flex; align-items: center; gap: 8px; }
+    .stat { min-width: 72px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); text-align: center; }
+    .stat strong { display: block; font-size: 1.02rem; }
+    .stat span { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; }
+    .layout { display: grid; grid-template-columns: 210px 1fr; gap: 18px; }
+    nav, .panel { border: 1px solid var(--line); border-radius: 16px; background: var(--paper); box-shadow: 0 6px 24px rgba(26, 55, 68, .05); }
+    nav { align-self: start; padding: 10px; position: sticky; top: 16px; }
+    .nav-btn { width: 100%; border: 0; border-radius: 10px; padding: 11px 12px; color: var(--ink); background: transparent; text-align: left; font-weight: 700; }
+    .nav-btn + .nav-btn { margin-top: 3px; }
+    .nav-btn:hover { background: var(--wash); }
+    .nav-btn.active { color: white; background: var(--blue); }
+    .nav-note { margin: 14px 8px 6px; color: var(--muted); font-size: .78rem; line-height: 1.45; }
+    .panel { min-height: 620px; padding: clamp(18px, 4vw, 32px); }
+    .view[hidden] { display: none; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 20px; }
+    h2 { margin: 0; font-size: clamp(1.45rem, 4vw, 2rem); letter-spacing: -.025em; }
+    .lede { margin: 6px 0 0; color: var(--muted); line-height: 1.5; }
+    .btn { border: 0; border-radius: 10px; padding: 11px 15px; font-weight: 800; transition: transform .1s ease, background .1s ease; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { color: white; background: var(--blue); }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-secondary { color: var(--ink); background: #e9f0f2; }
+    .course-summary { display: grid; grid-template-columns: 120px 1fr; gap: 22px; align-items: center; margin-bottom: 30px; padding: 18px; border-radius: 15px; background: linear-gradient(120deg, #eef8f6, #f4f8fb); }
+    .ring { --p: 0; width: 108px; aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: conic-gradient(var(--green) calc(var(--p) * 1%), #dbe8e7 0); position: relative; }
+    .ring::before { content: ""; position: absolute; inset: 12px; border-radius: 50%; background: white; }
+    .ring strong { position: relative; font-size: 1.35rem; }
+    .summary-copy strong { font-size: 1.15rem; }
+    .summary-copy p { margin: 5px 0 0; color: var(--muted); line-height: 1.45; }
+    .unit { margin-top: 27px; }
+    .unit h3 { margin: 0 0 10px; font-size: 1.05rem; }
+    .topic-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .topic { min-height: 120px; border: 1px solid var(--line); border-radius: 12px; padding: 13px; background: white; text-align: left; position: relative; overflow: hidden; }
+    .topic:hover { border-color: #84b8c6; box-shadow: 0 4px 14px rgba(23, 107, 135, .09); }
+    .topic-name { display: block; min-height: 42px; font-weight: 800; line-height: 1.3; }
+    .topic-meta { display: flex; justify-content: space-between; margin-top: 12px; color: var(--muted); font-size: .78rem; }
+    .bar { height: 6px; margin-top: 7px; border-radius: 10px; background: #e4ecee; overflow: hidden; }
+    .bar > i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--green); transition: width .25s ease; }
+    .practice-wrap { max-width: 680px; margin: 0 auto; }
+    .crumb { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 24px; color: var(--muted); font-size: .86rem; }
+    .question-card { border: 1px solid var(--line); border-radius: 16px; padding: clamp(20px, 5vw, 36px); }
+    .question-label { color: var(--muted); font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .question { min-height: 86px; display: flex; align-items: center; margin: 10px 0 22px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.45rem, 5vw, 2.15rem); line-height: 1.35; }
+    .answer-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .answer-row input { min-width: 0; border: 2px solid #cbd8dd; border-radius: 10px; padding: 12px 14px; color: var(--ink); background: white; }
+    .answer-row input[disabled] { color: var(--muted); background: #f3f5f5; }
+    .microcopy { margin: 9px 0 0; color: var(--muted); font-size: .8rem; }
+    .hint-btn { border: 0; padding: 10px 0; color: var(--blue); background: transparent; font-weight: 800; }
+    .feedback { min-height: 0; margin-top: 13px; border-radius: 12px; padding: 0; line-height: 1.55; white-space: pre-line; }
+    .feedback.good, .feedback.bad, .feedback.hint { padding: 14px 16px; }
+    .feedback.good { color: #176442; background: var(--green-soft); font-size: 1.08rem; font-weight: 900; animation: pop .18s ease-out; }
+    .feedback.bad { color: #762f2f; background: var(--red-soft); }
+    .feedback.hint { color: #265d70; background: #edf7fa; }
+    @keyframes pop { 50% { transform: scale(1.015); } }
+    .practice-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 14px; }
+    .topic-progress { margin-top: 24px; padding: 14px; border-radius: 12px; background: var(--wash); }
+    .topic-progress-line { display: flex; justify-content: space-between; color: var(--muted); font-size: .82rem; }
+    .topic-progress .bar { height: 8px; }
+    .progress-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0 28px; }
+    .metric { padding: 18px; border: 1px solid var(--line); border-radius: 13px; text-align: center; }
+    .metric strong { display: block; font-size: 1.65rem; }
+    .metric span { color: var(--muted); font-size: .82rem; }
+    .mastered-list { display: grid; gap: 8px; }
+    .progress-row { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr 52px; gap: 12px; align-items: center; padding: 7px 0; }
+    .progress-row span { font-size: .85rem; }
+    .progress-row output { color: var(--muted); text-align: right; font-size: .8rem; }
+    .data-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .file-label { display: inline-flex; align-items: center; }
+    .file-label input { position: absolute; opacity: 0; pointer-events: none; }
+    .toast { position: fixed; left: 50%; bottom: 24px; z-index: 5; transform: translate(-50%, 20px); border-radius: 999px; padding: 10px 16px; color: white; background: #173042; opacity: 0; pointer-events: none; transition: .2s; }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .burst { position: fixed; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+    .spark { position: absolute; top: 42%; width: 8px; height: 8px; border-radius: 2px; animation: fall .65s ease-out forwards; }
+    @keyframes fall { to { transform: translate(var(--x), var(--y)) rotate(300deg); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+    @media (max-width: 780px) {
+      .shell { padding: 12px; }
+      .topbar { align-items: start; }
+      .stats { gap: 5px; }
+      .stat { min-width: 58px; padding: 7px 6px; }
+      .layout { grid-template-columns: 1fr; }
+      nav { position: static; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+      .nav-btn { text-align: center; padding: 10px 5px; }
+      .nav-btn + .nav-btn { margin: 0; }
+      .nav-note { display: none; }
+      .panel { min-height: 0; padding: 17px; }
+      .topic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 500px) {
+      .brand p { display: none; }
+      .stats .stat:first-child { display: none; }
+      .course-summary { grid-template-columns: 88px 1fr; padding: 13px; }
+      .ring { width: 82px; }
+      .ring::before { inset: 9px; }
+      .topic-grid { grid-template-columns: 1fr; }
+      .topic { min-height: 102px; }
+      .answer-row { grid-template-columns: 1fr; }
+      .answer-row .btn { width: 100%; }
+      .progress-grid { grid-template-columns: 1fr; }
+      .progress-row { grid-template-columns: 1fr 60px; }
+      .progress-row .bar { grid-column: 1 / -1; grid-row: 2; }
+      .section-head { align-items: start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><h1>Math Mastery</h1><p>Generated practice · Arithmetic through Algebra I</p></div>
+      <div class="stats" aria-label="Learning statistics">
+        <div class="stat"><strong id="levelStat">1</strong><span>Level</span></div>
+        <div class="stat"><strong id="xpStat">0</strong><span>XP</span></div>
+        <div class="stat"><strong id="streakStat">0</strong><span>Streak</span></div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav aria-label="Main navigation">
+        <button class="nav-btn active" data-view="map">Course Map</button>
+        <button class="nav-btn" data-view="practice">Practice</button>
+        <button class="nav-btn" data-view="progress">Progress</button>
+        <p class="nav-note">Every topic is open. Start wherever you wish; difficulty adjusts as you work.</p>
+      </nav>
+
+      <main class="panel">
+        <section class="view" id="mapView">
+          <div class="section-head">
+            <div><h2>Course Map</h2><p class="lede">Choose any topic, or let mixed practice target your weakest active skills.</p></div>
+            <button class="btn btn-primary" id="mixedBtn">Mixed Practice</button>
+          </div>
+          <div class="course-summary">
+            <div class="ring" id="knowledgeRing"><strong id="knowledgeText">0%</strong></div>
+            <div class="summary-copy"><strong>Your knowledge</strong><p id="summaryText">Choose any tile to begin. Nothing is locked.</p></div>
+          </div>
+          <div id="courseUnits"></div>
+        </section>
+
+        <section class="view" id="practiceView" hidden>
+          <div class="practice-wrap">
+            <div class="crumb"><button class="hint-btn" id="backToMap">← Course map</button><span id="difficultyLabel">Foundation</span></div>
+            <div class="question-card">
+              <div class="question-label" id="topicLabel">Choose a topic</div>
+              <div class="question" id="questionText">Select a topic from the course map to begin.</div>
+              <form id="answerForm">
+                <div class="answer-row">
+                  <input id="answerInput" type="text" inputmode="decimal" autocomplete="off" aria-label="Your answer" placeholder="Enter your answer" disabled>
+                  <button class="btn btn-primary" id="submitBtn" type="submit" disabled>Check answer</button>
+                </div>
+              </form>
+              <p class="microcopy" id="answerHelp">Fractions such as 3/4 and decimals are both accepted.</p>
+              <button class="hint-btn" id="hintBtn" type="button" hidden>Need a hint?</button>
+              <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+              <div class="practice-actions">
+                <button class="btn btn-secondary" id="easierBtn" type="button" hidden>Make easier</button>
+                <button class="btn btn-secondary" id="skipBtn" type="button" hidden>Skip</button>
+              </div>
+            </div>
+            <div class="topic-progress" id="topicProgress" hidden>
+              <div class="topic-progress-line"><span>Topic mastery</span><strong id="topicMasteryText">0%</strong></div>
+              <div class="bar"><i id="topicMasteryBar"></i></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="progressView" hidden>
+          <h2>Progress</h2>
+          <p class="lede">Progress is saved only in this browser unless you export it.</p>
+          <div class="progress-grid">
+            <div class="metric"><strong id="problemsMetric">0</strong><span>Problems answered</span></div>
+            <div class="metric"><strong id="accuracyMetric">—</strong><span>Accuracy</span></div>
+            <div class="metric"><strong id="masteredMetric">0</strong><span>Topics mastered</span></div>
+          </div>
+          <div class="mastered-list" id="progressRows"></div>
+          <div class="data-actions">
+            <button class="btn btn-secondary" id="exportBtn">Export progress</button>
+            <label class="btn btn-secondary file-label">Import progress<input id="importInput" type="file" accept="application/json,.json"></label>
+            <button class="btn btn-secondary" id="resetBtn">Reset progress</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="burst" id="burst" aria-hidden="true"></div>
+
+  <script>
+  'use strict';
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) [a, b] = [b, a % b]; return a || 1; };
+  const frac = (n, d) => { const g = gcd(n, d); const sign = d < 0 ? -1 : 1; return [sign * n / g, Math.abs(d) / g]; };
+  const fstr = (n, d) => { const [a, b] = frac(n, d); return b === 1 ? String(a) : `${a}/${b}`; };
+  const fmt = n => Number.isInteger(n) ? String(n) : String(Number(n.toFixed(6)));
+  const rand = (min, max) => {
+    const span = max - min + 1;
+    if (globalThis.crypto?.getRandomValues) { const a = new Uint32Array(1); crypto.getRandomValues(a); return min + (a[0] % span); }
+    return min + Math.floor(Math.random() * span);
+  };
+  const pick = a => a[rand(0, a.length - 1)];
+  const nonzero = (min, max) => { let n = 0; while (!n) n = rand(min, max); return n; };
+  const signed = n => n < 0 ? `(${n})` : String(n);
+  const money = n => `$${n.toFixed(2)}`;
+  const normalizeExpr = raw => raw.toLowerCase().replace(/\s/g, '').replaceAll('−', '-').replaceAll('–', '-').replace('+-', '-');
+  const linearExpr = (coefficient, constant) => {
+    let out = coefficient === 0 ? '' : coefficient === 1 ? 'x' : coefficient === -1 ? '-x' : `${coefficient}x`;
+    if (constant !== 0) out += out ? ` ${constant < 0 ? '−' : '+'} ${Math.abs(constant)}` : String(constant);
+    return out || '0';
+  };
+  const parseAnswer = raw => {
+    let s = raw.trim().replaceAll(',', '').replaceAll('$', '').replaceAll('%', '').replace(/\s+/g, '');
+    if (!s) return NaN;
+    if (/^[-+]?\d*\.?\d+\/[-+]?\d*\.?\d+$/.test(s)) { const [a,b] = s.split('/').map(Number); return b ? a / b : NaN; }
+    return Number(s);
+  };
+  const numericCheck = (answer, tolerance = 1e-8) => raw => {
+    const n = parseAnswer(raw); return Number.isFinite(n) && Math.abs(n - answer) <= tolerance * Math.max(1, Math.abs(answer));
+  };
+  const problem = (prompt, answer, formula, hint, signature, tolerance) => ({ prompt, answer: fmt(answer), check: numericCheck(answer, tolerance), formula, hint, signature });
+  const ranges = level => [10, 25, 100, 500][level - 1];
+
+  const units = [
+    { name: 'Whole Numbers & Integers', topics: [
+      ['place', 'Place value and rounding'], ['add', 'Addition and subtraction'], ['mult', 'Multiplication and division'],
+      ['order', 'Order of operations'], ['integers', 'Integer operations']
+    ]},
+    { name: 'Fractions, Decimals & Percents', topics: [
+      ['simplify', 'Simplify fractions'], ['fracadd', 'Add and subtract fractions'], ['fracmult', 'Multiply and divide fractions'],
+      ['decimals', 'Decimal operations'], ['convert', 'Fraction–decimal–percent conversion'], ['percent', 'Percent of a number']
+    ]},
+    { name: 'Ratios & Proportions', topics: [
+      ['unitrate', 'Unit rates'], ['proportion', 'Solve proportions'], ['percentchange', 'Percent increase and decrease']
+    ]},
+    { name: 'Prealgebra', topics: [
+      ['evaluate', 'Evaluate expressions'], ['combine', 'Combine like terms'], ['distribute', 'Distributive property'],
+      ['onestep', 'One-step equations'], ['twostep', 'Two-step equations']
+    ]},
+    { name: 'Algebra I', topics: [
+      ['linear', 'Multi-step linear equations'], ['inequality', 'One-step inequalities'], ['slope', 'Slope from two points'],
+      ['linevalue', 'Evaluate a linear function'], ['exponents', 'Exponent rules']
+    ]},
+    { name: 'Geometry & Data', topics: [
+      ['rect', 'Rectangle perimeter and area'], ['triangle', 'Triangle area'], ['pythagorean', 'Pythagorean theorem'], ['mean', 'Mean of a data set']
+    ]}
+  ];
+  const topicNames = Object.fromEntries(units.flatMap(u => u.topics));
+
+  const generators = {
+    place(level) {
+      const places = [10, 100, 1000, 10000].slice(0, level + 1); const p = pick(places);
+      const n = rand(p + 1, p * (level * 30 + 10)); const ans = Math.round(n / p) * p;
+      return problem(`Round ${n.toLocaleString()} to the nearest ${p.toLocaleString()}.`, ans,
+        `${n.toLocaleString()} ÷ ${p.toLocaleString()} = ${fmt(n/p)}; the nearest whole number is ${Math.round(n/p)}. Therefore ${Math.round(n/p)} × ${p.toLocaleString()} = ${ans.toLocaleString()}.`,
+        `Divide by ${p.toLocaleString()}, round to the nearest whole number, then multiply by ${p.toLocaleString()}.`, `place-${n}-${p}`);
+    },
+    add(level) {
+      const m = ranges(level); let a = rand(level > 2 ? -m : 0, m), b = rand(level > 2 ? -m : 0, m); const subtract = rand(0,1) === 1;
+      const ans = subtract ? a-b : a+b; const op = subtract ? '−' : '+';
+      return problem(`${a} ${op} ${signed(b)} = ?`, ans, `${a} ${op} ${signed(b)} = ${ans}.`,
+        subtract ? `Subtraction means add the opposite: ${a} + ${signed(-b)}.` : `Combine the two quantities, attending to their signs.`, `add-${a}-${op}-${b}`);
+    },
+    mult(level) {
+      const max = [10,12,25,60][level-1]; const a = rand(2,max), b = rand(2,max); const divide = rand(0,1) && level > 1;
+      if (divide) return problem(`${a*b} ÷ ${a} = ?`, b, `${a*b} ÷ ${a} = ${b}, because ${a} × ${b} = ${a*b}.`, `Ask: ${a} times what number equals ${a*b}?`, `mult-${a*b}/${a}`);
+      return problem(`${a} × ${b} = ?`, a*b, `${a} × ${b} = ${a*b}.`, `Break one factor apart: ${a} × ${b} = ${a} × (${Math.max(1,b-1)} + ${b-Math.max(1,b-1)}).`, `mult-${a}x${b}`);
+    },
+    order(level) {
+      const a=rand(2,9+level*2), b=rand(2,8+level), c=rand(2,7+level), d=rand(1,5+level);
+      if (level < 3) { const ans=a+b*c; return problem(`${a} + ${b} × ${c} = ?`, ans, `${a} + ${b} × ${c} = ${a} + ${b*c} = ${ans}. Multiplication comes before addition.`, `Compute ${b} × ${c} first.`, `order-${a}+${b}x${c}`); }
+      const ans=(a+b)*c-d; return problem(`(${a} + ${b}) × ${c} − ${d} = ?`, ans, `(${a} + ${b}) × ${c} − ${d} = ${a+b} × ${c} − ${d} = ${(a+b)*c} − ${d} = ${ans}.`, `Parentheses first, then multiplication, then subtraction.`, `order-(${a}+${b})x${c}-${d}`);
+    },
+    integers(level) {
+      let a=nonzero(-8*level,8*level), b=nonzero(-8*level,8*level); const op=pick(['+','−','×']); const ans=op==='+'?a+b:op==='−'?a-b:a*b;
+      const rule=op==='×' ? `${Math.abs(a)} × ${Math.abs(b)} = ${Math.abs(ans)}; ${a<0===b<0?'equal':'different'} signs give a ${ans<0?'negative':'positive'} result.` : op==='−' ? `${a} − ${signed(b)} = ${a} + ${signed(-b)} = ${ans}.` : `${a} + ${signed(b)} = ${ans}.`;
+      return problem(`${signed(a)} ${op} ${signed(b)} = ?`, ans, rule, op==='×'?'Multiply the absolute values, then determine the sign.':op==='−'?'Change subtraction to addition of the opposite.':'Use a number line or combine signed quantities.',`int-${a}${op}${b}`);
+    },
+    simplify(level) {
+      let n=rand(2,9*level+5), d=rand(n+1,12*level+12), k=rand(2,8+level); const [sn,sd]=frac(n,d);
+      return { prompt:`Simplify ${n*k}/${d*k}.`, answer:fstr(sn,sd), check:numericCheck(sn/sd),
+        formula:`gcd(${n*k}, ${d*k}) = ${k*gcd(n,d)}. Divide numerator and denominator by ${k*gcd(n,d)}: ${n*k}/${d*k} = ${sn}/${sd}.`,
+        hint:'Find the greatest number that divides both the numerator and denominator.', signature:`simp-${n*k}/${d*k}` };
+    },
+    fracadd(level) {
+      const b=rand(2,6+level*2), d=rand(2,7+level*2), a=rand(1,b-1), c=rand(1,d-1), sub=level>1&&rand(0,2)===0;
+      const n=sub?a*d-c*b:a*d+c*b, den=b*d; const [sn,sd]=frac(n,den); const op=sub?'−':'+';
+      return { prompt:`${a}/${b} ${op} ${c}/${d} = ?`, answer:fstr(sn,sd), check:numericCheck(sn/sd),
+        formula:`${a}/${b} ${op} ${c}/${d} = (${a}×${d} ${op} ${c}×${b})/(${b}×${d}) = ${n}/${den} = ${fstr(sn,sd)}.`,
+        hint:`Use a common denominator. A guaranteed common denominator is ${b} × ${d} = ${den}.`, signature:`fadd-${a}/${b}${op}${c}/${d}` };
+    },
+    fracmult(level) {
+      const b=rand(2,7+level), d=rand(2,8+level), a=rand(1,b+2), c=rand(1,d+2), divide=level>1&&rand(0,1);
+      const n=divide?a*d:a*c, den=divide?b*c:b*d; const [sn,sd]=frac(n,den); const op=divide?'÷':'×';
+      return { prompt:`${a}/${b} ${op} ${c}/${d} = ?`, answer:fstr(sn,sd), check:numericCheck(sn/sd),
+        formula: divide ? `${a}/${b} ÷ ${c}/${d} = ${a}/${b} × ${d}/${c} = ${a*d}/${b*c} = ${fstr(sn,sd)}.` : `${a}/${b} × ${c}/${d} = (${a}×${c})/(${b}×${d}) = ${a*c}/${b*d} = ${fstr(sn,sd)}.`,
+        hint:divide?'Keep the first fraction, change division to multiplication, and flip the second fraction.':'Multiply numerators; multiply denominators; then simplify.', signature:`fmult-${a}/${b}${op}${c}/${d}` };
+    },
+    decimals(level) {
+      const digits=Math.min(3,Math.ceil(level/2)), scale=10**digits, a=rand(10,50*level)/scale, b=rand(5,35*level)/scale, mult=level>2&&rand(0,2)===0;
+      const ans=mult?a*b:a+b; const op=mult?'×':'+';
+      return problem(`${fmt(a)} ${op} ${fmt(b)} = ?`, ans, mult?`${fmt(a)} × ${fmt(b)} = ${fmt(ans)}.`:`Align decimal points: ${fmt(a)} + ${fmt(b)} = ${fmt(ans)}.`, mult?'Multiply as whole numbers, then place the total number of decimal places.':'Align decimal points before adding.',`dec-${a}${op}${b}`,1e-6);
+    },
+    convert(level) {
+      const den=pick(level<3?[2,4,5,10,20]:[2,4,5,8,10,20,25,40,50]), n=rand(1,den-1), mode=rand(0,1), value=n/den;
+      if(mode) return {prompt:`Write ${n}/${den} as a percent.`,answer:`${fmt(value*100)}%`,check:numericCheck(value*100),formula:`${n}/${den} = ${fmt(value)}. Then ${fmt(value)} × 100% = ${fmt(value*100)}%.`,hint:'Divide numerator by denominator, then multiply by 100%.',signature:`conv-${n}/${den}-pct`};
+      return problem(`Write ${n}/${den} as a decimal.`,value,`${n} ÷ ${den} = ${fmt(value)}.`,`A fraction bar means division: compute ${n} ÷ ${den}.`,`conv-${n}/${den}-dec`,1e-6);
+    },
+    percent(level) {
+      const pct=pick([5,10,15,20,25,30,40,50,60,75,80,90,125,150].slice(0,7+level*2)), base=rand(2,12*level)*pick([5,10]); const ans=pct/100*base;
+      return problem(`What is ${pct}% of ${base}?`,ans,`${pct}% of ${base} = (${pct}/100) × ${base} = ${fmt(pct/100)} × ${base} = ${fmt(ans)}.`,`Translate “of” as multiplication: (${pct}/100) × ${base}.`,`pct-${pct}-${base}`,1e-6);
+    },
+    unitrate(level) {
+      const rate=rand(2,10*level), units=rand(2,9+level), total=rate*units, things=pick(['miles','pages','items','dollars']);
+      return problem(`${total} ${things} in ${units} hours is how many ${things} per hour?`,rate,`${total} ÷ ${units} = ${rate} ${things} per hour.`,`A unit rate has 1 in the denominator, so divide ${total} by ${units}.`,`rate-${total}-${units}-${things}`);
+    },
+    proportion(level) {
+      const a=rand(1,8+level), b=rand(2,10+level), x=rand(2,12+level*2), c=a*x, d=b*x;
+      return problem(`Solve: ${a}/${b} = x/${d}`,c,`${a}/${b} = x/${d} → ${b}x = ${a}×${d} → x = (${a}×${d})/${b} = ${c}.`,`Cross-multiply: ${b}x = ${a} × ${d}.`,`prop-${a}/${b}=x/${d}`);
+    },
+    percentchange(level) {
+      const old=rand(2,12*level)*10, pct=pick([5,10,20,25,40,50]), increase=rand(0,1), change=old*pct/100, now=increase?old+change:old-change;
+      return {prompt:`A value changes from ${old} to ${fmt(now)}. What is the percent ${increase?'increase':'decrease'}?`,answer:`${pct}%`,check:numericCheck(pct),formula:`Percent change = |new − old| / old × 100% = |${fmt(now)} − ${old}| / ${old} × 100% = ${fmt(change)}/${old} × 100% = ${pct}%.`,hint:'Use |new − old| ÷ old × 100%.',signature:`pchange-${old}-${now}`};
+    },
+    evaluate(level) {
+      const x=nonzero(-5*level,6*level), a=nonzero(-4*level,5*level), b=rand(-8*level,8*level), power=level===4&&rand(0,1), ans=power?a*x*x+b:a*x+b;
+      return problem(`If x = ${x}, find ${a}x${power?'²':''} ${b<0?'−':'+'} ${Math.abs(b)}.`,ans,power?`${a}(${x})² ${b<0?'−':'+'} ${Math.abs(b)} = ${a}×${x*x} ${b<0?'−':'+'} ${Math.abs(b)} = ${ans}.`:`${a}(${x}) ${b<0?'−':'+'} ${Math.abs(b)} = ${a*x} ${b<0?'−':'+'} ${Math.abs(b)} = ${ans}.`,`Replace every x with (${x}), then follow order of operations.`,`eval-${x}-${a}-${b}-${power}`);
+    },
+    combine(level) {
+      const a=nonzero(-5*level,6*level), b=nonzero(-5*level,6*level), c=rand(-8*level,8*level), d=rand(-8*level,8*level); const coef=a+b, con=c+d;
+      return {prompt:`Combine like terms: ${a}x ${c<0?'−':'+'} ${Math.abs(c)} ${b<0?'−':'+'} ${Math.abs(b)}x ${d<0?'−':'+'} ${Math.abs(d)}`,
+        answer:linearExpr(coef,con),check:raw=>normalizeExpr(raw)===normalizeExpr(linearExpr(coef,con)),
+        formula:`(${a} + ${signed(b)})x + (${c} + ${signed(d)}) = ${linearExpr(coef,con)}. Only terms with the same variable part combine.`,hint:'Group the x-terms together and the constant terms together.',signature:`combine-${a}-${b}-${c}-${d}`};
+    },
+    distribute(level) {
+      const a=nonzero(-3*level,4*level), b=nonzero(-4*level,5*level), c=nonzero(-5*level,6*level); const bc=a*c, ab=a*b;
+      return {prompt:`Expand: ${a}(${b}x ${c<0?'−':'+'} ${Math.abs(c)})`,answer:linearExpr(ab,bc),check:raw=>normalizeExpr(raw)===normalizeExpr(linearExpr(ab,bc)),
+        formula:`${a}(${b}x ${c<0?'−':'+'} ${Math.abs(c)}) = (${a}×${b})x + (${a}×${c}) = ${linearExpr(ab,bc)}.`,hint:`Multiply ${a} by each term inside the parentheses.`,signature:`dist-${a}-${b}-${c}`};
+    },
+    onestep(level) {
+      const x=nonzero(-8*level,9*level), a=nonzero(-8*level,9*level), mult=level>1&&rand(0,1);
+      if(mult) return problem(`Solve: ${a}x = ${a*x}`,x,`${a}x = ${a*x} → x = ${a*x}/${a} = ${x}. Divide both sides by ${a}.`,`Undo multiplication by dividing both sides by ${a}.`,`one-${a}x=${a*x}`);
+      const c=x+a; return problem(`Solve: x ${a<0?'−':'+'} ${Math.abs(a)} = ${c}`,x,`x ${a<0?'−':'+'} ${Math.abs(a)} = ${c} → x = ${c} ${a<0?'+':'−'} ${Math.abs(a)} = ${x}.`,`Use the inverse operation on both sides.`,`one-x+${a}=${c}`);
+    },
+    twostep(level) {
+      const x=nonzero(-6*level,7*level), a=nonzero(-5*level,6*level), b=nonzero(-8*level,9*level), c=a*x+b;
+      return problem(`Solve: ${a}x ${b<0?'−':'+'} ${Math.abs(b)} = ${c}`,x,`${a}x ${b<0?'−':'+'} ${Math.abs(b)} = ${c} → ${a}x = ${c} ${b<0?'+':'−'} ${Math.abs(b)} = ${a*x} → x = ${a*x}/${a} = ${x}.`,`Undo ${b<0?'subtraction':'addition'} first; then divide by ${a}.`,`two-${a}x+${b}=${c}`);
+    },
+    linear(level) {
+      let x=nonzero(-5*level,6*level), a=nonzero(-4*level,5*level), b=rand(-8*level,8*level), d=nonzero(-4*level,5*level); while(d===a)d=nonzero(-4*level,5*level); const e=(a-d)*x+b;
+      return problem(`Solve: ${a}x ${b<0?'−':'+'} ${Math.abs(b)} = ${d}x ${e<0?'−':'+'} ${Math.abs(e)}`,x,
+        `${a}x ${b<0?'−':'+'} ${Math.abs(b)} = ${d}x ${e<0?'−':'+'} ${Math.abs(e)} → ${a-d}x = ${e-b} → x = (${e-b})/(${a-d}) = ${x}.`,
+        `Subtract ${d}x from both sides, then subtract ${b} from both sides.`,`linear-${a}-${b}-${d}-${e}`);
+    },
+    inequality(level) {
+      const x=nonzero(-7*level,8*level), a=nonzero(-6*level,7*level), c=a*x; const sign=pick(['<','>']); const flips=a<0; const resultSign=flips?(sign==='<'?'>':'<'):sign;
+      return {prompt:`Solve for x: ${a}x ${sign} ${c}`,answer:`x ${resultSign} ${x}`,check:raw=>normalizeExpr(raw)===`x${resultSign}${x}`,
+        formula:`${a}x ${sign} ${c} → x ${resultSign} ${x}. Divide both sides by ${a}${flips?'; because it is negative, reverse the inequality sign':''}.`,hint:`Divide both sides by ${a}.${flips?' Remember: dividing by a negative reverses the inequality.':''}`,signature:`ineq-${a}x${sign}${c}`};
+    },
+    slope(level) {
+      const x1=rand(-5*level,4*level), dx=nonzero(-5*level,5*level), y1=rand(-6*level,6*level), m=nonzero(-4*level,5*level), x2=x1+dx, y2=y1+m*dx;
+      return problem(`Find the slope through (${x1}, ${y1}) and (${x2}, ${y2}).`,m,`m = (y₂ − y₁)/(x₂ − x₁) = (${y2} − ${signed(y1)})/(${x2} − ${signed(x1)}) = ${y2-y1}/${x2-x1} = ${m}.`,`Use m = (y₂ − y₁)/(x₂ − x₁). Keep the point order consistent.`,`slope-${x1}-${y1}-${x2}-${y2}`);
+    },
+    linevalue(level) {
+      const m=nonzero(-4*level,5*level), b=rand(-8*level,8*level), x=nonzero(-5*level,6*level), ans=m*x+b;
+      return problem(`If f(x) = ${m}x ${b<0?'−':'+'} ${Math.abs(b)}, find f(${x}).`,ans,`f(${x}) = ${m}(${x}) ${b<0?'−':'+'} ${Math.abs(b)} = ${m*x} ${b<0?'−':'+'} ${Math.abs(b)} = ${ans}.`,`Substitute ${x} for x.`,`line-${m}-${b}-${x}`);
+    },
+    exponents(level) {
+      const base=pick(['x','a','m','y']), p=rand(1,4+level), q=rand(1,4+level), divide=level>1&&rand(0,1); const exp=divide?p-q:p+q; const op=divide?'÷':'×';
+      return {prompt:`Simplify: ${base}^${p} ${op} ${base}^${q}`,answer:exp===0?'1':`${base}^${exp}`,check:raw=>normalizeExpr(raw)===(exp===0?'1':`${base}^${exp}`),
+        formula:divide?`${base}^${p} ÷ ${base}^${q} = ${base}^(${p}−${q}) = ${exp===0?'1':`${base}^${exp}`}.`:`${base}^${p} × ${base}^${q} = ${base}^(${p}+${q}) = ${base}^${exp}.`,hint:`For equal bases, ${divide?'subtract':'add'} the exponents. Use ^ to type an exponent.`,signature:`exp-${base}-${p}-${op}-${q}`};
+    },
+    rect(level) {
+      const w=rand(2,8*level+4), h=rand(2,7*level+5), area=rand(0,1), ans=area?w*h:2*(w+h);
+      return problem(`A rectangle is ${w} units by ${h} units. Find its ${area?'area':'perimeter'}.`,ans,area?`A = length × width = ${w} × ${h} = ${ans} square units.`:`P = 2(length + width) = 2(${w} + ${h}) = 2(${w+h}) = ${ans} units.`,area?'Use A = length × width.':'Use P = 2(length + width).',`rect-${w}-${h}-${area}`);
+    },
+    triangle(level) {
+      const b=rand(2,10*level), h=rand(2,9*level); const ans=b*h/2;
+      return problem(`A triangle has base ${b} and height ${h}. Find its area.`,ans,`A = ½bh = ½(${b})(${h}) = ${fmt(ans)} square units.`,`Use A = ½ × base × perpendicular height.`,`tri-${b}-${h}`,1e-6);
+    },
+    pythagorean(level) {
+      const triples=[[3,4,5],[5,12,13],[6,8,10],[7,24,25],[8,15,17],[9,12,15],[9,40,41],[12,16,20]].slice(0,level*2), [a,b,c]=pick(triples), missing=level>2&&rand(0,1)?'leg':'hyp';
+      if(missing==='hyp') return problem(`A right triangle has legs ${a} and ${b}. Find the hypotenuse.`,c,`c² = a² + b² = ${a}² + ${b}² = ${a*a} + ${b*b} = ${c*c}; c = √${c*c} = ${c}.`,`Use c² = a² + b².`,`pyth-h-${a}-${b}`);
+      return problem(`A right triangle has hypotenuse ${c} and one leg ${a}. Find the other leg.`,b,`b² = c² − a² = ${c}² − ${a}² = ${c*c} − ${a*a} = ${b*b}; b = √${b*b} = ${b}.`,`Rearrange a² + b² = c² to isolate the missing leg.`,`pyth-l-${a}-${c}`);
+    },
+    mean(level) {
+      const count=3+level, mean=rand(3,12*level), nums=Array.from({length:count-1},()=>rand(1,mean*2)); nums.push(mean*count-nums.reduce((a,b)=>a+b,0));
+      return problem(`Find the mean: ${nums.join(', ')}`,mean,`Mean = sum ÷ count = (${nums.join(' + ')})/${count} = ${mean*count}/${count} = ${mean}.`,`Add all ${count} values, then divide by ${count}.`,`mean-${nums.join('-')}`);
+    }
+  };
+
+  const blankTopic = () => ({mastery:0, difficulty:1, recent:[], correct:0, answered:0});
+  const defaultState = () => ({version:1, xp:0, streak:0, bestStreak:0, total:0, correct:0, activeTopic:null, topics:Object.fromEntries(Object.keys(topicNames).map(k=>[k,blankTopic()])), signatures:[]});
+  let state = loadState(), current = null, awaitingNext = false, mixedMode = false;
+  function loadState(){
+    try { const saved=JSON.parse(localStorage.getItem('mathMasteryState')); const fresh=defaultState(); if(saved?.version===1){Object.assign(fresh,saved); for(const k of Object.keys(fresh.topics)) fresh.topics[k]=Object.assign(blankTopic(),saved.topics?.[k]); return fresh;} }
+    catch(e){} return defaultState();
+  }
+  function save(){ localStorage.setItem('mathMasteryState',JSON.stringify(state)); updateStats(); }
+  function overall(){ return Math.round(Object.values(state.topics).reduce((s,t)=>s+t.mastery,0)/Object.keys(state.topics).length); }
+  function updateStats(){
+    document.getElementById('xpStat').textContent=state.xp; document.getElementById('streakStat').textContent=state.streak;
+    document.getElementById('levelStat').textContent=Math.floor(state.xp/250)+1;
+    const p=overall(); document.getElementById('knowledgeRing').style.setProperty('--p',p); document.getElementById('knowledgeText').textContent=p+'%';
+    const started=Object.values(state.topics).filter(t=>t.answered).length, mastered=Object.values(state.topics).filter(t=>t.mastery>=90).length;
+    document.getElementById('summaryText').textContent=started?`${started} topics started · ${mastered} mastered. Every topic remains open.`:'Choose any tile to begin. Nothing is locked.';
+  }
+  function renderMap(){
+    const host=document.getElementById('courseUnits'); host.textContent='';
+    units.forEach(unit=>{ const section=document.createElement('section'); section.className='unit'; const h=document.createElement('h3'); h.textContent=unit.name; section.append(h); const grid=document.createElement('div'); grid.className='topic-grid';
+      unit.topics.forEach(([id,name])=>{const t=state.topics[id], b=document.createElement('button'); b.className='topic'; b.dataset.topic=id; b.innerHTML=`<span class="topic-name"></span><span class="topic-meta"><span></span><span></span></span><span class="bar"><i></i></span>`; b.querySelector('.topic-name').textContent=name; const metas=b.querySelectorAll('.topic-meta span'); metas[0].textContent=t.answered?`${t.answered} answered`:'Ready to begin'; metas[1].textContent=`${t.mastery}%`; b.querySelector('i').style.width=t.mastery+'%'; b.addEventListener('click',()=>startTopic(id,false)); grid.append(b);});
+      section.append(grid); host.append(section); }); updateStats();
+  }
+  function showView(name){
+    document.querySelectorAll('.view').forEach(v=>v.hidden=v.id!==name+'View'); document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));
+    if(name==='map')renderMap(); if(name==='progress')renderProgress();
+  }
+  function pickMixed(){
+    const entries=Object.entries(state.topics); const started=entries.filter(([,t])=>t.answered>0&&t.mastery<90); if(started.length)return started.sort((a,b)=>a[1].mastery-b[1].mastery)[rand(0,Math.min(3,started.length)-1)][0];
+    return entries.filter(([,t])=>t.mastery<90)[rand(0,entries.filter(([,t])=>t.mastery<90).length-1)]?.[0]||pick(Object.keys(topicNames));
+  }
+  function startTopic(id,isMixed){ state.activeTopic=id; mixedMode=isMixed; save(); showView('practice'); nextProblem(); }
+  function nextProblem(){
+    if(mixedMode) state.activeTopic=pickMixed(); const id=state.activeTopic; if(!id)return showView('map'); const t=state.topics[id]; let q,tries=0;
+    do { q=generators[id](t.difficulty); tries++; } while(state.signatures.includes(q.signature)&&tries<30);
+    state.signatures.push(q.signature); state.signatures=state.signatures.slice(-80); current=q; awaitingNext=false;
+    document.getElementById('topicLabel').textContent=topicNames[id]+(mixedMode?' · Mixed practice':''); document.getElementById('difficultyLabel').textContent=['Foundation','Developing','Proficient','Challenge'][t.difficulty-1];
+    document.getElementById('questionText').textContent=q.prompt; const input=document.getElementById('answerInput'); input.disabled=false; input.value=''; input.focus();
+    document.getElementById('submitBtn').disabled=false; document.getElementById('submitBtn').textContent='Check answer'; document.getElementById('feedback').className='feedback'; document.getElementById('feedback').textContent='';
+    document.getElementById('hintBtn').hidden=false; document.getElementById('easierBtn').hidden=t.difficulty===1; document.getElementById('skipBtn').hidden=false; document.getElementById('topicProgress').hidden=false; updateTopicProgress(); save();
+  }
+  function adjustTopic(correct){
+    const t=state.topics[state.activeTopic], oldMastery=t.mastery; t.answered++; state.total++; t.recent.push(correct); t.recent=t.recent.slice(-5);
+    if(correct){t.correct++;state.correct++;state.streak++;state.bestStreak=Math.max(state.bestStreak,state.streak);const gain=10+t.difficulty*3+Math.min(10,state.streak);state.xp+=gain;t.mastery=clamp(t.mastery+4+t.difficulty*2,0,100);}
+    else{state.streak=0;t.mastery=clamp(t.mastery-3,0,100);}
+    const last4=t.recent.slice(-4); if(last4.length>=3&&last4.filter(Boolean).length>=3)t.difficulty=clamp(t.difficulty+1,1,4); if(t.recent.slice(-2).length===2&&t.recent.slice(-2).every(x=>!x))t.difficulty=clamp(t.difficulty-1,1,4);
+    if(correct && (Math.floor(t.mastery/25)>Math.floor(oldMastery/25)||state.streak>0&&state.streak%5===0)) burst(); save(); updateTopicProgress();
+  }
+  function submitAnswer(e){
+    e.preventDefault(); if(!current)return; if(awaitingNext){nextProblem();return;} const input=document.getElementById('answerInput'); if(!input.value.trim()){input.focus();return;}
+    const ok=current.check(input.value); adjustTopic(ok); awaitingNext=true; input.disabled=true; const feedback=document.getElementById('feedback'); feedback.className='feedback '+(ok?'good':'bad'); feedback.textContent=ok?'Correct!':`Not quite.\n${current.formula}\nCorrect answer: ${current.answer}`;
+    document.getElementById('submitBtn').textContent='Next question'; document.getElementById('hintBtn').hidden=true; document.getElementById('easierBtn').hidden=true; document.getElementById('skipBtn').hidden=true; document.getElementById('submitBtn').focus();
+  }
+  function updateTopicProgress(){const t=state.topics[state.activeTopic];document.getElementById('topicMasteryText').textContent=t.mastery+'%';document.getElementById('topicMasteryBar').style.width=t.mastery+'%';}
+  function showHint(){if(!current||awaitingNext)return;const f=document.getElementById('feedback');f.className='feedback hint';f.textContent=current.hint;}
+  function renderProgress(){
+    document.getElementById('problemsMetric').textContent=state.total; document.getElementById('accuracyMetric').textContent=state.total?Math.round(state.correct/state.total*100)+'%':'—'; document.getElementById('masteredMetric').textContent=Object.values(state.topics).filter(t=>t.mastery>=90).length;
+    const host=document.getElementById('progressRows');host.textContent=''; Object.entries(topicNames).sort((a,b)=>state.topics[b[0]].mastery-state.topics[a[0]].mastery).forEach(([id,name])=>{const row=document.createElement('div');row.className='progress-row';row.innerHTML=`<span></span><div class="bar"><i></i></div><output></output>`;row.querySelector('span').textContent=name;row.querySelector('i').style.width=state.topics[id].mastery+'%';row.querySelector('output').textContent=state.topics[id].mastery+'%';host.append(row);});
+  }
+  function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),1800);}
+  function burst(){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const host=document.getElementById('burst'),colors=['#21845b','#e5a82f','#176b87','#d45b5b'];host.textContent='';for(let i=0;i<18;i++){const s=document.createElement('i');s.className='spark';s.style.left=(48+rand(-5,5))+'%';s.style.background=pick(colors);s.style.setProperty('--x',rand(-170,170)+'px');s.style.setProperty('--y',rand(50,230)+'px');host.append(s);}setTimeout(()=>host.textContent='',750);
+  }
+  function exportProgress(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='math-mastery-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Progress exported.');}
+  function importProgress(file){const reader=new FileReader();reader.onload=()=>{try{const x=JSON.parse(reader.result);if(x.version!==1||!x.topics)throw Error();localStorage.setItem('mathMasteryState',JSON.stringify(x));state=loadState();renderProgress();updateStats();toast('Progress imported.');}catch(e){toast('That progress file is not valid.');}};reader.readAsText(file);}
+
+  document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.view==='practice'&&!state.activeTopic)return showView('map');showView(b.dataset.view);}));
+  document.getElementById('mixedBtn').addEventListener('click',()=>startTopic(pickMixed(),true)); document.getElementById('backToMap').addEventListener('click',()=>showView('map'));
+  document.getElementById('answerForm').addEventListener('submit',submitAnswer); document.getElementById('hintBtn').addEventListener('click',showHint);
+  document.getElementById('skipBtn').addEventListener('click',nextProblem); document.getElementById('easierBtn').addEventListener('click',()=>{state.topics[state.activeTopic].difficulty=clamp(state.topics[state.activeTopic].difficulty-1,1,4);nextProblem();});
+  document.getElementById('exportBtn').addEventListener('click',exportProgress); document.getElementById('importInput').addEventListener('change',e=>{if(e.target.files[0])importProgress(e.target.files[0]);e.target.value='';});
+  document.getElementById('resetBtn').addEventListener('click',()=>{if(confirm('Reset all Math Mastery progress on this browser?')){state=defaultState();save();renderProgress();toast('Progress reset.');}});
+  renderMap();
+  </script>
+</body>
+</html>
