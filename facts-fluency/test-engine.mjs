@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
-import {FACTS,MODULES,BY_ID,BY_MODULE,OPS,DAY,newRecord,newProfile,check,status,recordAttempt,summary,createSession,choose,finishQuestion,resetModule,validateBackup,strategy,recommend} from './engine.mjs';
+import {ALL_FACTS,FACTS,MODULES,BY_ID,BY_MODULE,OPS,DAY,newRecord,newProfile,check,status,recordAttempt,summary,createSession,customSession,scopeFacts,choose,finishQuestion,resetModule,validateBackup,strategy,recommend} from './engine.mjs';
 
 let assertions=0;
 const test=(name,fn)=>{fn();assertions++;console.log('PASS '+name);};
 const base=new Date(2026,0,10,12).getTime();
 const profile=()=>newProfile('Test learner','p-test-001');
-const attempt=(p,f,overrides={})=>recordAttempt(p,f,{correct:true,seconds:2,now:base,...overrides});
+// Isolated mastery tests simulate two intervening items; scheduler tests below
+// independently exercise actual answer-by-answer spacing.
+const attempt=(p,f,overrides={})=>{p.serial+=2;return recordAttempt(p,f,{correct:true,seconds:2,now:base,...overrides});};
 
 test('Inventory is exhaustive, unique, correct, and 663 facts',()=>{
  assert.equal(FACTS.length,663);
@@ -85,7 +87,7 @@ test('Accuracy-only mode never labels a fact fluent',()=>{
 test('Module scheduling covers every fact across small sessions without immediate repeats',()=>{
  for(const m of MODULES){
   const p=profile();let serial=0;
-  for(let round=0;round<Math.ceil(m.facts.length/3)+5;round++){
+  for(let round=0;round<m.facts.length*2&&m.facts.some(f=>!p.records[f.id]?.attempts);round++){
    const s=createSession(m.id,'learn',p);
    for(let i=0;i<10;i++){
     const f=choose(p,s,base+serial*10000,()=>0.5);
@@ -98,12 +100,12 @@ test('Module scheduling covers every fact across small sessions without immediat
  }
 });
 
-test('Review prioritizes due facts; failed fact is queued after three intervening questions',()=>{
+test('Review prioritizes due facts; failed fact is queued after two intervening questions',()=>{
  const p=profile(),m=BY_MODULE['add-0'];
  for(const f of m.facts){p.records[f.id]={...newRecord(),attempts:5,run:5,fastRun:2,due:base+10*DAY};}
  const target=m.facts[8];p.records[target.id].due=base-1;
  const s=createSession(m.id,'review',p);assert.equal(choose(p,s,base,()=>0.5).id,target.id);
- finishQuestion(s,target,false,false,0);assert.equal(s.retry[0].at,4);
+ finishQuestion(s,target,false,false,0);assert.equal(s.retry[0].at,3);
  for(let i=0;i<3;i++){const f=m.facts[i];finishQuestion(s,f,true,true,0);}
  assert.equal(choose(p,s,base,()=>0.5).id,target.id);
 });
@@ -170,6 +172,146 @@ test('Backup safely ignores prototype keys and rejects fractional counters',()=>
  assert.equal(Object.keys(imported.profiles[0].records).length,0);
  const p=profile();attempt(p,FACTS[0]);p.records[FACTS[0].id].attempts=1.5;
  assert.throws(()=>validateBackup({version:1,profiles:[p]}));
+});
+
+test('All 1743 extended facts have correct answers, safe entry, and stable strategy keys',()=>{
+ assert.equal(ALL_FACTS.length,1743);assert.equal(new Set(ALL_FACTS.map(f=>f.id)).size,1743);
+ for(const f of ALL_FACTS){
+  assert.equal(f.answer,f.op==='add'?f.x+f.y:f.op==='sub'?f.x-f.y:f.op==='mul'?f.x*f.y:f.x/f.y);
+  assert.ok(check(String(f.answer),f.answer));assert.ok(f.answer<=400&&f.answer>=0);
+  const s=strategy(f);assert.match(s.key,/^[a-z0-9-]+$/);assert.ok(s.steps.includes(String(f.answer)));
+  for(const key of ['key','title','hint','steps','model'])assert.ok(s[key]&&!/undefined|NaN/.test(s[key]));
+ }
+});
+
+test('Every displayed numeric equation in every worked strategy is arithmetically correct',()=>{
+ let checked=0;
+ for(const f of ALL_FACTS)for(const match of strategy(f).steps.matchAll(/(\d+)\s*([+×−÷])\s*(\d+)\s*=\s*(\d+)/g)){
+  const [,aa,op,bb,cc]=match,a=Number(aa),b=Number(bb),c=Number(cc);
+  assert.equal(op==='+'?a+b:op==='−'?a-b:op==='×'?a*b:a/b,c,`${f.id}: ${match[0]}`);checked++;
+ }
+ assert.ok(checked>=ALL_FACTS.length);
+});
+
+test('All 60 combinations and number limits have the exact intended inverse families',()=>{
+ for(const ceiling of [5,10,12,20])for(let mask=1;mask<16;mask++){
+  const ops=OPS.filter((_,i)=>mask&(1<<i)),scope=scopeFacts({ops,ceiling});
+  const expected=ops.reduce((n,op)=>n+(op==='div'?ceiling*(ceiling+1):(ceiling+1)**2),0);
+  assert.equal(scope.length,expected);assert.equal(new Set(scope.map(f=>f.id)).size,expected);
+  for(const f of scope)assert.ok(ops.includes(f.op)&&f.a<=ceiling&&f.b<=ceiling);
+  for(const f of ALL_FACTS)assert.equal(scope.includes(f),ops.includes(f.op)&&f.a<=ceiling&&f.b<=ceiling);
+ }
+ for(const bad of [{ops:[]},{ops:['bogus']},{ceiling:13},{ops:'add'},{ceiling:Infinity}])assert.throws(()=>scopeFacts(bad));
+});
+
+test('Mixed learning introduces all selected operations across short sets without adding more than three new facts',()=>{
+ for(let mask=1;mask<16;mask++){
+  const ops=OPS.filter((_,i)=>mask&(1<<i)),p=profile(),seenOps=new Set();
+  for(let round=0;round<3;round++){
+   const s=customSession(p,{ops,ceiling:5}),fresh=new Set();
+   for(let i=0;i<10;i++){
+    const f=choose(p,s,base+round*100000+i*1000,()=>0.5);assert.ok(f);
+    if(!p.records[f.id]?.attempts)fresh.add(f.id);seenOps.add(f.op);
+    assert.ok(ops.includes(f.op)&&f.a<=5&&f.b<=5);
+    const r=recordAttempt(p,f,{correct:true,seconds:2,now:base+round*100000+i*1000});finishQuestion(s,f,true,r.qualified,r.xp);
+   }
+   assert.ok(fresh.size<=3);
+  }
+  assert.deepEqual([...seenOps].sort(),[...ops].sort());
+ }
+});
+
+test('Every extended fact is reached by custom practice; selection cannot starve later facts',()=>{
+ const p=profile(),seen=new Set();let serial=0;
+ for(let round=0;round<ALL_FACTS.length*2&&seen.size<ALL_FACTS.length;round++){
+  const s=customSession(p,{ops:OPS,ceiling:20});
+  for(let i=0;i<10;i++){
+   const f=choose(p,s,base+serial*1000,()=>0.5);assert.ok(f);seen.add(f.id);
+   const r=recordAttempt(p,f,{correct:true,seconds:2,now:base+serial++*1000});finishQuestion(s,f,true,r.qualified,r.xp);
+  }
+ }
+ assert.equal(seen.size,1743);
+});
+
+test('Challenge includes only accurate facts, balances operations, and never repeats an item in a set',()=>{
+ const p=profile();assert.equal(choose(p,customSession(p,{challenge:true}),base),null);
+ for(const f of ALL_FACTS)p.records[f.id]={...newRecord(),attempts:3,correct:3,run:3};
+ for(let mask=1;mask<16;mask++){
+  const ops=OPS.filter((_,i)=>mask&(1<<i)),s=customSession(p,{ops,ceiling:20,challenge:true}),seen=new Set(),counts=Object.fromEntries(ops.map(op=>[op,0]));
+  for(let i=0;i<10;i++){const f=choose(p,s,base,()=>0.5);assert.ok(f);assert.ok(!seen.has(f.id));seen.add(f.id);counts[f.op]++;finishQuestion(s,f,true,true,0);}
+  assert.ok(Math.max(...Object.values(counts))-Math.min(...Object.values(counts))<=1);
+ }
+ const tiny=profile(),f=FACTS[0];tiny.records[f.id]={...newRecord(),attempts:3,correct:3,run:3};
+ const s=customSession(tiny,{challenge:true});assert.equal(choose(tiny,s,base).id,f.id);finishQuestion(s,f,true,true,0);assert.equal(choose(tiny,s,base),null);
+});
+
+test('A missed challenge fact leaves the challenge even when its retry becomes ready',()=>{
+ const p=profile();for(const f of FACTS)p.records[f.id]={...newRecord(),attempts:3,correct:3,run:3};
+ const s=customSession(p,{challenge:true}),missed=choose(p,s,base,()=>0.5);
+ const wrong=recordAttempt(p,missed,{correct:false,now:base});finishQuestion(s,missed,false,wrong.qualified,wrong.xp);
+ for(let i=0;i<9;i++){
+  const f=choose(p,s,base+(i+1)*1000,()=>0.5);assert.ok(f);assert.notEqual(f.id,missed.id);assert.ok(p.records[f.id].run>=3);
+  const r=recordAttempt(p,f,{correct:true,now:base+(i+1)*1000});finishQuestion(s,f,true,r.qualified,r.xp);
+ }
+});
+
+test('Review ends when due facts finish rather than adding unrelated new facts',()=>{
+ const p=profile(),f=FACTS[0];p.records[f.id]={...newRecord(),attempts:1,correct:1,run:1,due:base};
+ const s=createSession(null,'review',p);assert.deepEqual(s.pool,[f.id]);assert.equal(choose(p,s,base).id,f.id);
+ finishQuestion(s,f,true,true,0);assert.equal(choose(p,s,base),null);
+ assert.equal(choose(profile(),createSession(null,'review',profile()),base),null);
+});
+
+test('Rapid immediate repetitions cannot create accuracy or fluency',()=>{
+ const p=profile(),f=FACTS[0];
+ for(let i=0;i<20;i++)recordAttempt(p,f,{correct:true,seconds:1,now:base+i*1000});
+ assert.equal(p.records[f.id].run,1);assert.equal(p.records[f.id].fastRun,0);
+ recordAttempt(p,f,{correct:true,seconds:1,now:base+DAY});assert.equal(p.records[f.id].run,2,'next-day recall is independent even without intervening app items');
+});
+
+test('Errors keep their delayed correction across rounds and backups',()=>{
+ const p=profile(),f=BY_ID['mul:6:7'];
+ recordAttempt(p,f,{correct:false,now:base});
+ const restored=validateBackup({version:1,active:p.id,profiles:[p]}).profiles[0];
+ const s=customSession(restored,{ops:['mul'],ceiling:12});
+ assert.notEqual(choose(restored,s,base,()=>0.5)?.id,f.id);
+ for(let i=0;i<3;i++){const filler=BY_ID[`mul:1:${i+2}`];recordAttempt(restored,filler,{correct:true,now:base+(i+1)*1000});}
+ s.pool=[f.id];s.introduced=[];
+ assert.equal(choose(restored,s,base+4000,()=>0.5).id,f.id);
+});
+
+test('Three new assisted facts can all be retried without a dead end',()=>{
+ for(const correct of [true,false]){
+  const p=profile(),s=createSession('add-0','learn',p);
+  for(let i=0;i<15;i++){
+   const f=choose(p,s,base+i*1000,()=>0.5);assert.ok(f,`dead end at ${i}`);
+   const r=recordAttempt(p,f,{correct,assisted:true,now:base+i*1000});
+   finishQuestion(s,f,correct,r.qualified,r.xp);
+  }
+ }
+});
+
+test('Six still-learning facts pause introductions; learning one opens one place',()=>{
+ const p=profile(),m=BY_MODULE['mul-4'];
+ for(const f of m.facts.slice(0,6))p.records[f.id]={...newRecord(),attempts:1,correct:1,run:1};
+ const paused=createSession(m.id,'learn',p);assert.deepEqual(paused.introduced,[]);
+ for(let i=0;i<10;i++){
+  const f=choose(p,paused,base+i*1000,()=>0.5);assert.ok(f);assert.ok(p.records[f.id]?.attempts);
+  const r=recordAttempt(p,f,{correct:false,now:base+i*1000});finishQuestion(paused,f,false,r.qualified,r.xp);
+ }
+ p.records[m.facts[0].id]={...newRecord(),attempts:3,correct:3,run:3};
+ const reopened=createSession(m.id,'learn',p);assert.equal(reopened.introduced.length,1);
+ assert.ok(!p.records[reopened.introduced[0]]?.attempts);
+});
+
+test('Old v1 backups and new strategy lessons retain compatible progress',()=>{
+ const p=profile();attempt(p,BY_ID['mul:20:20']);p.lessons['strategy:mul-double:20']=true;
+ p.settings.seconds=3;
+ const restored=validateBackup({version:1,profiles:[p]}).profiles[0];
+ assert.ok(restored.records['mul:20:20']);assert.equal(restored.lessons['strategy:mul-double:20'],true);assert.equal(restored.settings.seconds,3);
+ delete p.serial;delete p.recent;
+ for(const r of Object.values(p.records)){delete r.lastSerial;delete r.retryAt;}
+ assert.doesNotThrow(()=>validateBackup({version:1,profiles:[p]}));
 });
 
 // Nonfatal audit probes: keep them visible until the owner fixes them.

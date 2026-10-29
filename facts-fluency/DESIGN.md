@@ -1,82 +1,68 @@
-# Fact & Form — curriculum and learning design
+# Fact & Form — revised design
+
+October 29, 2026. See [the 89-item audit](AUDIT.md) for baseline findings, instructional specialists, and acceptance criteria.
 
 ## Purpose
 
-Make foundational arithmetic facts readily retrievable so that working memory remains available for reasoning. This is a focused practice tool, not a substitute for mathematical understanding or an unrelated entertainment game. Its aim is accurate, fluent, durable recall. It is not affiliated with Justin Skycak or Math Academy.
+Explicitly teach arithmetic facts, then develop accurate, efficient recall through independent practice and later review. No discovery-learning lesson design, unrelated entertainment, external application libraries, or tracking scripts. This is an independent implementation, not a field-tested Engelmann Direct Instruction program or Math Academy's proprietary algorithm. Its effectiveness has not been established in learner trials.
 
-## Exact inventory: 663 facts, not 695
+## Inventories and selection
 
-There is no natural 695-fact total for the following complete, explicitly defined inventory. The application uses **663** and does not invent or duplicate 32 facts to reach the requested number.
+For limit n, addition has (n+1)² ordered a+b pairs; subtraction has the corresponding (a+b)−a=b prompts; multiplication has (n+1)² products; division has n(n+1) exact quotients (d×q)÷d=q with d=1…n and q=0…n. No division by zero or negative subtraction answers.
 
-| Operation | Definition | Count |
-| --- | --- | ---: |
-| Addition | a + b, where a and b independently range from 0 through 12 | 169 |
-| Subtraction | (a + b) − a = b, for the same a and b | 169 |
-| Multiplication | a × b, where a and b independently range from 0 through 12 | 169 |
-| Division | (d × q) ÷ d = q, with divisor d from 1 through 12 and quotient q from 0 through 12 | 156 |
-| **Total** | **169 + 169 + 169 + 156** | **663** |
+| Limit | Addition | Subtraction | Multiplication | Division | Total |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 5 | 36 | 36 | 36 | 30 | 138 |
+| 10 | 121 | 121 | 121 | 110 | 473 |
+| 12 | 169 | 169 | 169 | 156 | 663 |
+| 20 | 441 | 441 | 441 | 420 | 1,743 |
 
-Reversed addition and multiplication prompts are separate recall tasks, even though they share an answer. Subtraction includes facts such as 24 − 12; division includes 144 ÷ 12. Division by zero is never included. The inventory is finite; practice continues indefinitely by revisiting and mixing these facts. Variety must not prevent the repetition required for memorization.
+The limit applies to underlying addends/factors, not every displayed number. Twelve includes 24−12 and 144÷12. The 663 core facts retain their old IDs and progress. The optional extension adds 1,080 facts and is not required for core completion. Both coverage counts are shown separately.
 
-## Twenty simple modules
+Twenty lessons partition the core inventory using the first matching category. Addition/inverse subtraction: zero; one/two; doubles/near doubles; ten or sum ten; remaining facts. Multiplication/inverse division: zero/one; two/ten; five; three/four/eleven; remaining facts. Every module is open. Recommendations now address every fact's accuracy instead of skipping the last 15%.
 
-Five modules belong to each operation. Classification uses the first matching row, so modules partition the inventory rather than double-counting facts. Addition and subtraction use the underlying addition-family values a and b. Multiplication uses its factors; division uses its divisor and quotient.
+Four buttons support all 15 nonempty operation subsets. Pair presets and All four simplify selection. Empty selections and quick-practice scopes without eligible facts cannot start. One fact shares one record across all lessons and mixed sets; resets apply wherever it appears.
 
-| Priority | Addition and inverse subtraction | Multiplication and inverse division |
-| --- | --- | --- |
-| 1 | Either value is zero | Either value is zero or one |
-| 2 | Either value is one or two | Either value is two or ten |
-| 3 | Doubles or near doubles: absolute difference at most one | Either value is five |
-| 4 | Either value is ten, or the sum is ten | Either value is three, four, or eleven |
-| 5 | Remaining facts: bridge through ten or use a known fact | Remaining facts involving six, seven, eight, nine, and twelve |
+## Instruction and correction
 
-The order provides a practical route from identities and small increments to useful anchors and harder combinations. All modules remain available; recommendations guide rather than lock out learners who already know earlier material. Opposite operations share explanatory fact families, but success on one prompt must not automatically mark all related prompts mastered.
+Show the actual question and a brief, step-by-step method before a new strategy. Then hide the answer and ask the learner to respond. This supported response is not independent evidence. Teaching flags are per strategy and core/extension band, not per broad module. Addition doubles do not rely on multiplication; fives do not require division. Explain order swaps explicitly, avoid nested symbolic chains, and replace huge dot arrays with compact descriptions.
 
-## Instruction and practice loop
+Correct responses receive exactly “Correct!”. Errors show the right answer and worked method, then a hide-and-retry correction. Immediate corrections do not erase errors or earn mastery/points. Later independent retries follow intervening questions. Learners may always leave a round.
 
-1. Give concise direct instruction on the relevant relation or strategy.
-2. Show a worked example, using concrete groupings or a useful decomposition where appropriate.
-3. Ask for a typed numerical answer without displaying answer choices.
-4. Begin with accuracy and untimed practice. Introduce only a small number of new facts among known or recently learned facts.
-5. On an error or help request, provide the correct relation and a short worked explanation. Schedule a later independent retry; copying a shown answer is not mastery evidence.
-6. Revisit facts after intervening questions and across days. Prefer needed reviews over repeatedly farming already easy questions.
-7. After accuracy is established, measure fluent recall using a configurable response-time target. The default six-second target is a practical starting setting, not a universal scientific boundary.
+The 12-question check is explicitly a sample. Passing it neither certifies unseen facts nor places the learner at the hardest module.
 
-There is no answer deadline: a slow correct response remains correct. Adjust timing for typing speed, accessibility needs, and learner readiness. Fast guesses should not outperform accurate learning. Meaning and calculation strategies establish the fact; retrieval practice then makes the fact itself readily available.
+## Practice and speed
 
-## Honest progress states
+No more than three new facts enter a round, and new introductions pause when six selected facts still lack accuracy. Error retries are spaced by two intervening recorded questions when available, compatible with a three-fact novice pool. Progress records carry retry history across rounds and saves. Immediate same-fact repetition cannot manufacture independent accuracy. An exhausted eligible pool can end a round early.
 
-- **New:** not yet attempted.
-- **Learning:** introduced but not yet consistently accurate.
-- **Accurate:** repeated independent correct responses, without a requirement for speed.
-- **Fluent:** established accuracy accompanied by sufficiently prompt unassisted responses.
-- **Retained:** fluent knowledge supported by successful spaced due reviews on at least three distinct days (or accurate recall across those reviews when accuracy-only mode is selected).
+Mixed practice balances available selected operations, with needed practice prioritized within the scope. Strict review includes only due facts and finishes when exhausted. Quick practice includes only facts already answered independently correctly at least three times; a fact is not repeated within that quick round. Errors leave quick practice until accuracy is rebuilt.
 
-A single successful answer or one long session cannot establish durable retention. Hinted answers and corrected copies do not receive independent mastery credit. Due reviews provide stronger retention evidence than premature repetition. These labels describe evidence collected by this application, not a clinical certification of automaticity. Facts remain reviewable after reaching the highest state.
+Quick-round targets are 2, 3, 4, 6, or 10 seconds. They do not cut off answers or mark slow correct answers wrong. The separate Settings target controls the long-term quick-recall progress label and includes an accuracy-only option. Both include typing time and are imperfect recall measures. Help and interruptions invalidate independent speed evidence.
 
-## Motivation tied to learning
+## Progress and rewards
 
-Rounds contain ten questions and end with a clear summary. Learners may continue for as many rounds as they choose, while a natural stopping point makes short distributed practice convenient. Rewards and progress indicators should emphasize coverage, independent accuracy, and successful reviews. Avoid punitive loss of accumulated achievement, pressured daily streaks, gambling-like rewards, public ranking, or unrelated minigames. Engagement serves learning rather than maximizing screen time.
+- Not tried yet: no attempts.
+- Still learning: insufficient independent accuracy evidence.
+- Correct without help: at least three consecutive independent correct responses.
+- Correct and quick: also two subsequent independent responses within the Settings target.
+- Remembered on later days: also successful actually-due reviews on at least three different dates; the speed condition is omitted in accuracy-only mode.
 
-The scheduler and reward thresholds are transparent engineering heuristics informed by research. They are not a replication of Math Academy's proprietary systems, nor an experimentally validated optimal schedule. Continued refinement should examine delayed recall, errors, coverage, and accessibility—not just session length or clicks.
+Intervals grow approximately 1, 3, 7, 21, and 60 days. Errors trigger more practice and restart evidence of reliable recall. These thresholds are transparent heuristics, not validated optimal parameters. Remembered does not mean permanent.
 
-## Profiles, privacy, and recovery
+Points are capped to one qualifying success per fact per day. Levels measure accumulated practice, not knowledge; changes appear in round summaries. No lost streaks, lives, leaderboards, random rewards, or incentives for excessive session length. Up-to-ten-question rounds have natural stopping points and unlimited voluntary continuation.
 
-- Named profiles are local to this browser and device; no account or password is required.
-- Do not use IP addresses as learner identity. Shared networks and changing addresses make them unreliable, and server-side tracking is unnecessary here.
-- Local storage is persistence, not a backup. Clearing browser data, using a different browser/device, or leaving private browsing may lose or hide progress.
-- Export progress regularly. Import a saved export to restore or move progress; safeguard exports because they contain profile names and learning records.
-- Profiles are not access-controlled private accounts. Someone using the same browser can access them.
-- Hosting providers may maintain ordinary request logs; the application's no-IP-identification policy does not imply that the host has no logs.
+## Controls and persistence
 
-## Reset semantics
+Plain learner wording; detailed methodology stays under For parents and teachers. Buttons show selected states, touch targets are at least 44px, feedback is announced, focus is visible, dialogs work with keyboards, and reduced-motion preferences are respected. A small-screen keypad complements keyboard input.
 
-Offer a confirmation before destructive resets and recommend exporting first. Resetting one module clears only that module's fact records in the selected profile; other modules and other profiles remain unchanged. Resetting all progress affects only the selected profile, not every learner using the browser. The interface should describe the exact scope before confirmation.
+The existing storage key and version remain. New optional fields have defaults in old backups. Fact IDs, points, and profiles are preserved. Imports are validated before replacement. Resets identify the learner and scope, keep unrelated records, and require confirmation. Fact-set resets retain points; whole-learner reset leaves other people untouched.
 
-## Evidence informing the design
+Saving is browser-local, not cloud synchronization or a backup. Export includes all profiles; import replaces them after confirmation. Clearing browser data removes progress. Persistent warnings report unavailable/corrupt storage. Cross-tab changes stop stale practice. Shared-device profiles are not password protected. GitHub may keep normal hosting logs; the app adds no analytics or IP identity.
 
-1. **Justin Skycak, “Fast, Correct Answers Do Matter in Mathematics” (2024).** Describes a progression from understanding meaning to untimed competence and then timed fluency, with a warning against imposing timing before successful execution. https://www.justinmath.com/fast-correct-answers-do-matter-in-mathematics/
-2. **Justin Skycak, “The Math Academy Way FAQ” (2026).** Describes brief worked examples followed by active problem solving, distinguishes baseline mastery from automaticity, and emphasizes spaced reinforcement over time. This is a primary account of Math Academy's approach, not independent proof that every implementation detail is optimal. https://www.justinmath.com/the-math-academy-way-faq/
-3. **Institute of Education Sciences / What Works Clearinghouse, “Assisting Students Struggling with Mathematics: Intervention in the Elementary Grades” (2021).** Rates systematic instruction, clear mathematical language, selected representations, number lines, word-problem instruction, and timed activities as strongly supported recommendations for the guide's intervention population. https://ies.ed.gov/ncee/wwc/PracticeGuide/26
+## Sources, status, and limits
 
-These sources support the instructional principles. They do not establish that twenty modules, ten-question rounds, a six-second target, or three review days are uniquely best for every learner. Those parameters are deliberately modest, inspectable implementation choices.
+The primary-source shortlist is in [AUDIT.md](AUDIT.md): Skycak; Engelmann/Carnine; Archer/Hughes; Rosenshine; Sweller/Cooper; and retrieval-practice researchers. The earlier Department of Education reference is not retained as this revision's instructional authority.
+
+The audit drove the code revision. Real-learner comprehension, delayed-learning outcomes, and full assistive-technology/device coverage still require testing beyond this development session. Recommendations use a practical module sequence, not a validated individual prerequisite graph. The source principles do not establish that these custom scripts or scheduling parameters are uniquely best.
+
+Run `node test-engine.mjs` for arithmetic, inventory, scheduling, scope, reset, and backup regression tests. Browser QA additionally checks actual selection controls, lessons, correction responses, extended answers, profiles, and publication. Automated passing tests are not proof of educational effectiveness.
