@@ -16,12 +16,13 @@ For limit n, addition has (n+1)² ordered a+b pairs; subtraction has the corresp
 | 10 | 121 | 121 | 121 | 110 | 473 |
 | 12 | 169 | 169 | 169 | 156 | 663 |
 | 20 | 441 | 441 | 441 | 420 | 1,743 |
+| 25 | 676 | 676 | 676 | 650 | 2,678 |
 
-The limit applies to underlying addends/factors, not every displayed number. Twelve includes 24−12 and 144÷12. The 663 core facts retain their old IDs and progress. The optional extension adds 1,080 facts and is not required for core completion. Both coverage counts are shown separately.
+Minimums 0–15 and maximums 1–25 include each integer. Both underlying addends/factors must be within the bounds. Minimum greater than maximum disables start/details/reset and shows a clear error. Subtraction uses the corresponding addition-family values; division uses a divisor and quotient within the bounds, excluding divisor zero. The bounds do not constrain every displayed number. Twelve includes 24−12 and 144÷12. The 663 core facts retain their old IDs and progress. The optional extension adds 2,015 facts and is not required for core completion. Both coverage counts are shown separately.
 
 Twenty lessons partition the core inventory using the first matching category. Addition/inverse subtraction: zero; one/two; doubles/near doubles; ten or sum ten; remaining facts. Multiplication/inverse division: zero/one; two/ten; five; three/four/eleven; remaining facts. Every module is open. Recommendations now address every fact's accuracy instead of skipping the last 15%.
 
-Four buttons support all 15 nonempty operation subsets. Pair presets and All four simplify selection. Empty selections and quick-practice scopes without eligible facts cannot start. One fact shares one record across all lessons and mixed sets; resets apply wherever it appears.
+Four buttons support all 15 nonempty operation subsets and all 295 valid minimum/maximum pairs (4,425 scopes). Pair presets and All four simplify selection. Empty selections and quick-practice scopes without eligible facts cannot start. One fact shares one record across all lessons and mixed sets; resets apply wherever it appears.
 
 ## Instruction and correction
 
@@ -37,7 +38,7 @@ No more than three new facts enter a round, and new introductions pause when six
 
 Mixed practice balances available selected operations, with needed practice prioritized within the scope. Strict review includes only due facts and finishes when exhausted. The selector makes the entire selected fact set available immediately, in both ordinary and speed-goal practice. No completed lessons or prior correct answers are required. It starts directly with a question; help and worked corrections remain available. Guided lessons keep their small-new-fact limits. Speed-goal rounds do not repeat a fact within the same round.
 
-Quick-round targets are 2, 3, 4, 6, or 10 seconds. They do not cut off answers or mark slow correct answers wrong. The separate Settings target controls the long-term quick-recall progress label and includes an accuracy-only option. Both include typing time and are imperfect recall measures. Help and interruptions invalidate independent speed evidence.
+Timed rounds offer 2, 3, 4, 6, or 10 seconds. A visible numeric countdown and bar start with each question. At zero the attempt ends, inputs are disabled, the attempt is recorded as unsuccessful, and the worked answer appears. A boundary check rejects a late submission even if a delayed interval has not fired. The timer stops on submitted answers, leaving practice, profile switches, and round changes. Help does not extend the deadline; opening steps cannot reset it. Correction retries are untimed and uncredited as independent recall. A separate tested clock module ensures once-only expiry and cancelled callbacks cannot affect another question. The separate Settings target still controls long-term quick-recall progress labels and includes accuracy-only mode. Both include typing time. Untimed practice is always available.
 
 ## Progress and rewards
 
@@ -66,3 +67,10 @@ The primary-source shortlist is in [AUDIT.md](AUDIT.md): Skycak; Engelmann/Carni
 The audit drove the code revision. Real-learner comprehension, delayed-learning outcomes, and full assistive-technology/device coverage still require testing beyond this development session. Recommendations use a practical module sequence, not a validated individual prerequisite graph. The source principles do not establish that these custom scripts or scheduling parameters are uniquely best.
 
 Run `node test-engine.mjs` for arithmetic, inventory, scheduling, scope, reset, and backup regression tests. Browser QA additionally checks actual selection controls, lessons, correction responses, extended answers, profiles, and publication. Automated passing tests are not proof of educational effectiveness.
+
+## Range, timer, and palette release
+
+The full optional bank now covers 0–25: 2,678 prompts, with the original 663 core IDs unchanged. The largest product is 625. Existing records and backups remain compatible. Choosing a singleton range is supported; close repeats still cannot manufacture independent mastery. The page background is pale yellow (#fffbe0) and primary green is forest green (#215d3a).
+
+Run both `node test-engine.mjs` and `node test-countdown.mjs`. Regression coverage includes all 4,425 scopes, valid/invalid equal bounds, extended arithmetic and backup retention, and countdown boundaries/cancellation. Browser checks include countdown expiry, disabled expired input, an untimed correction, and a correct answer stopping the timer before zero.
+

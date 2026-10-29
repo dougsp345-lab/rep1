@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f6ed">
+  <meta name="theme-color" content="#fffbe0">
   <meta name="description" content="Learn and practice addition, subtraction, multiplication, and division. Short lessons, clear steps, and review that saves your progress.">
   <title>Fact &amp; Form — Arithmetic fluency</title>
   <link rel="stylesheet" href="style.css">
@@ -56,9 +56,10 @@
           </div>
           <div class="picker-actions"><button class="button button-text" id="pickAddSub">Add and subtract</button><button class="button button-text" id="pickMulDiv">Multiply and divide</button></div>
           <div class="picker-settings">
-            <div><label class="field-label" for="numberLimit">Numbers up to</label><select id="numberLimit" aria-describedby="rangeHelp"><option value="5">5</option><option value="10">10</option><option value="12" selected>12</option><option value="20">20</option></select></div>
-            <div><label class="field-label" for="practiceKind">How to practice</label><select id="practiceKind"><option value="learn">Practice all selected facts</option><option value="challenge">Practice with a speed goal</option></select></div>
-            <div id="challengeOptions" hidden><label class="field-label" for="challengeSeconds">Try to answer within</label><select id="challengeSeconds" aria-describedby="challengeHelp"><option value="2">2 seconds</option><option value="3">3 seconds</option><option value="4" selected>4 seconds</option><option value="6">6 seconds</option><option value="10">10 seconds</option></select><p id="challengeHelp" class="field-help">No countdown. A slow answer can still be correct.</p></div>
+            <div><label class="field-label" for="numberMinimum">Minimum number</label><select id="numberMinimum" aria-describedby="rangeHelp"><option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option></select></div>
+            <div><label class="field-label" for="numberLimit">Numbers up to</label><select id="numberLimit" aria-describedby="rangeHelp"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12" selected>12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option></select></div>
+            <div><label class="field-label" for="practiceKind">How to practice</label><select id="practiceKind"><option value="learn">Practice all selected facts</option><option value="challenge">Timed questions</option></select></div>
+            <div id="challengeOptions" hidden><label class="field-label" for="challengeSeconds">Time for each question</label><select id="challengeSeconds" aria-describedby="challengeHelp"><option value="2">2 seconds</option><option value="3">3 seconds</option><option value="4" selected>4 seconds</option><option value="6">6 seconds</option><option value="10">10 seconds</option></select><p id="challengeHelp" class="field-help">A visible timer counts down. At zero, the attempt ends and the answer is shown.</p></div>
           </div>
           <p id="rangeHelp" class="field-help">This limit is for the numbers you add or multiply. Answers can be larger. Subtraction and division use the matching facts.</p>
           <p id="mixCount" class="picker-count" role="status" aria-live="polite">663 facts selected.</p>
@@ -83,6 +84,7 @@
         <div class="practice-shell">
           <div class="practice-heading"><div><h1 id="practiceTitle">Math practice</h1><p id="strategyLabel">Take your time. Try to get it right.</p></div><span class="session-count" id="sessionCount">0 / 10</span></div>
           <label class="sr-only" for="sessionProgress">Practice set progress</label><progress id="sessionProgress" max="12" value="0">0%</progress>
+          <div id="questionTimer" class="question-timer" hidden><div class="timer-heading"><span>Time left</span><strong id="timerValue" role="timer" aria-label="Time left" aria-live="off">0.0 seconds</strong></div><div class="timer-track" aria-hidden="true"><span id="timerBar"></span></div></div>
           <div class="lesson-card" id="lesson" hidden aria-label="Direct instruction"></div>
           <button class="button button-dark lesson-start" id="lessonStart" hidden>Let’s try it <span aria-hidden="true">→</span></button>
           <div id="questionArea" class="question-card">
@@ -119,7 +121,7 @@
     <div class="dialog-body">
       <p class="storage-note">Each learner has separate progress on this browser. Use a backup to move progress to another device. Clearing browser data also clears local progress.</p>
       <label class="field-label" for="profileName">Learner name</label><div class="field-row"><input id="profileName" type="text" maxlength="40" autocomplete="off"><button class="button button-outline" id="renameBtn">Rename</button></div>
-      <label class="field-label" for="fluencySeconds">Recall target — for parents and teachers</label><select id="fluencySeconds" aria-describedby="settingsHelp"><option value="2">2 seconds</option><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="6" selected>6 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="0">No speed target</option></select><p id="settingsHelp" class="field-help">First learn to answer correctly. Only then does speed count toward quick recall. There is no countdown or time limit. Allow for the learner’s reading and typing speed.</p>
+      <label class="field-label" for="fluencySeconds">Recall target — for parents and teachers</label><select id="fluencySeconds" aria-describedby="settingsHelp"><option value="2">2 seconds</option><option value="3">3 seconds</option><option value="4">4 seconds</option><option value="6" selected>6 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="0">No speed target</option></select><p id="settingsHelp" class="field-help">First learn to answer correctly. Only then does speed count toward quick recall. This progress target does not set a deadline. Timed questions in Choose your practice have their own countdown. Allow for the learner’s reading and typing speed.</p>
       <h3>Keep a copy</h3><div class="settings-actions"><button class="button button-outline" id="backupBtn">Export backup ↓</button><label class="button button-outline file-button">Import backup ↑<input type="file" id="importFile" accept="application/json,.json"></label></div>
       <div class="danger-zone"><h3>Start fresh</h3><p>Individual modules can be reset from their cards on the learning path.</p><div class="settings-actions"><button class="button button-danger" id="resetAllBtn">Reset this learner’s progress</button><button class="button button-text danger-text" id="deleteProfileBtn">Delete learner</button></div></div>
       <p id="statusMessage" class="field-help" role="status" aria-live="polite"></p>

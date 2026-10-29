@@ -24,7 +24,7 @@ export function group(op,a,b){
  return 4;
 }
 export const ALL_FACTS=[];
-for(const op of OPS)for(let a=0;a<=20;a++)for(let b=0;b<=20;b++){
+for(const op of OPS)for(let a=0;a<=25;a++)for(let b=0;b<=25;b++){
  if(op==='div'&&a===0)continue; // a is divisor, b is quotient
  const x=op==='sub'?a+b:op==='div'?a*b:a;
  const y=op==='sub'||op==='div'?a:b;
@@ -87,9 +87,9 @@ export function createSession(moduleId,mode='learn',profile=null){
  const scope=moduleId?BY_MODULE[moduleId].facts:mode==='review'?ALL_FACTS:FACTS;
  return sessionFrom(scope,moduleId,mode,profile);
 }
-export function scopeFacts({ops=OPS,ceiling=12}={}){
- if(!Array.isArray(ops)||!ops.length||ops.some(op=>!OPS.includes(op))||![5,10,12,20].includes(ceiling))throw Error('Choose at least one operation and a number limit of 5, 10, 12, or 20.');
- return ALL_FACTS.filter(f=>ops.includes(f.op)&&f.a<=ceiling&&f.b<=ceiling);
+export function scopeFacts({ops=OPS,minimum=0,ceiling=12}={}){
+ if(!Array.isArray(ops)||!ops.length||ops.some(op=>!OPS.includes(op))||!Number.isInteger(minimum)||minimum<0||minimum>15||!Number.isInteger(ceiling)||ceiling<1||ceiling>25||minimum>ceiling)throw Error('Choose at least one operation and a minimum from 0–15 that is no greater than the maximum from 1–25.');
+ return ALL_FACTS.filter(f=>ops.includes(f.op)&&f.a>=minimum&&f.b>=minimum&&f.a<=ceiling&&f.b<=ceiling);
 }
 function sessionFrom(scope,moduleId,mode,profile){
  if(mode==='review')scope=scope.filter(f=>profile?.records[f.id]?.attempts&&profile.records[f.id].due<=Date.now());
@@ -104,11 +104,11 @@ function sessionFrom(scope,moduleId,mode,profile){
  while(fresh.length<newLimit&&queues.some(q=>q.items.length))for(const q of queues){if(q.items.length&&fresh.length<newLimit)fresh.push(q.items.shift().id);}
  return {moduleId,mode,number:0,correct:0,independent:0,xp:0,recent:[...(profile?.recent||[])],retry:[],responses:[],pool:scope.map(f=>f.id),introduced:fresh,limit:mode==='diagnostic'?12:10};
 }
-export function customSession(profile,{ops=OPS,ceiling=12,challenge=false}={}){
+export function customSession(profile,{ops=OPS,minimum=0,ceiling=12,challenge=false}={}){
  // The selector is open practice, not a prerequisite-gated lesson.
- const session=sessionFrom(scopeFacts({ops,ceiling}),null,'practice',profile);
+ const session=sessionFrom(scopeFacts({ops,minimum,ceiling}),null,'practice',profile);
  session.mode=challenge?'challenge':'practice';
- session.custom={ops:[...new Set(ops)],ceiling,challenge};
+ session.custom={ops:[...new Set(ops)],minimum,ceiling,challenge};
  return session;
 }
 export function choose(profile,session,now=Date.now(),random=Math.random){
@@ -120,7 +120,10 @@ export function choose(profile,session,now=Date.now(),random=Math.random){
  }
  const all=session.pool.map(id=>BY_ID[id]).filter(Boolean);
  const waiting=new Set(session.retry.filter(r=>r.at>session.number).map(r=>r.id));
- const eligible=all.filter(f=>!waiting.has(f.id)&&!(profile.records[f.id]?.retryAt>(profile.serial||0)+1&&now-profile.records[f.id].last<5*60000));
+ let eligible=all.filter(f=>!waiting.has(f.id)&&!(profile.records[f.id]?.retryAt>(profile.serial||0)+1&&now-profile.records[f.id].last<5*60000));
+ // A deliberately tiny custom range may have no filler questions. Keep it
+ // playable; recordAttempt still withholds independent credit for close repeats.
+ if(session.custom&&session.mode!=='challenge'&&!eligible.length)eligible=all;
  const retry=session.mode==='challenge'?null:session.retry.find(r=>r.at<=session.number&&eligible.some(f=>f.id===r.id));
  if(retry){session.retry=session.retry.filter(r=>r!==retry);return BY_ID[retry.id];}
  let candidates=session.custom?eligible:eligible.filter(f=>profile.records[f.id]?.attempts||session.introduced.includes(f.id));

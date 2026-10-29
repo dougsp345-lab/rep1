@@ -147,3 +147,7 @@ The numbered items above record baseline findings and revision requirements. The
 ### Subsequent requested adjustment
 
 Choose your practice is now unrestricted: both ordinary and speed-goal rounds can draw any fact in the selected operations/range from the first visit. They do not require prior correct answers, completed lessons, or the guided lessons' three-new-fact limit. Questions appear directly; help and worked corrections remain available. The earlier checklist's known-facts-only quick-practice recommendation is superseded for this selector by the user's explicit preference. Guided lessons and honest progress accounting are unchanged.
+
+### Range and real-timer adjustment
+
+The user subsequently requested integer minimums 0–15, integer maximums 1–25, and a real deadline. These supersede the original four fixed ceilings and the earlier no-countdown recommendation for the optional timed mode. Timed questions now show a countdown, end at zero, record the expired attempt as unsuccessful, and offer an untimed correction. The 0–25 inventory has 2,678 facts; core progress is unchanged. Current test coverage checks all 4,425 valid operation/range combinations, including singleton ranges and divisor-zero exclusion. See DESIGN.md and the countdown regression test for the current behavior. Original numbered findings above are retained as the baseline audit, not current claims contradicting these user-requested changes.

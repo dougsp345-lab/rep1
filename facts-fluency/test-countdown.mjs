@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {createCountdown} from './countdown.mjs';
+let time=0,expired=0,nextId=0;const callbacks=new Map(),ticks=[];
+const timer=createCountdown({now:()=>time,schedule:fn=>{callbacks.set(++nextId,fn);return nextId;},cancel:id=>callbacks.delete(id),onTick:(ms,fraction)=>ticks.push({ms,fraction}),onExpire:()=>expired++});
+timer.start(4);assert.equal(timer.remaining(),4000);assert.deepEqual(ticks.at(-1),{ms:4000,fraction:1});
+time=1500;callbacks.get(nextId)();assert.equal(timer.remaining(),2500);assert.equal(ticks.at(-1).fraction,.625);
+time=4000;assert.equal(timer.remaining(),0);assert.equal(timer.running,true,'deadline is observable even before the next callback');
+const stale=callbacks.get(nextId);stale();assert.equal(expired,1);assert.equal(timer.running,false);assert.equal(callbacks.size,0);
+stale();assert.equal(expired,1,'expiry happens only once');
+timer.start(2);const cancelled=callbacks.get(nextId);timer.stop();time+=10000;cancelled();assert.equal(expired,1,'stopped questions cannot expire later');
+timer.start(6);const replaced=callbacks.get(nextId);time+=1000;timer.start(3);replaced();assert.equal(timer.remaining(),3000);assert.equal(callbacks.size,1,'next question replaces old clock');
+time+=20000;callbacks.get(nextId)();assert.equal(expired,2,'late/background callbacks honor the deadline');assert.equal(ticks.at(-1).ms,0);
+for(const invalid of [0,-1,NaN,Infinity])assert.throws(()=>timer.start(invalid));
+console.log('PASS Countdown: initial value, ticking, exact deadline, once-only expiry, cancellation, replacement, late callbacks, invalid durations.');

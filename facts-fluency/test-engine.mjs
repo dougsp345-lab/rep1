@@ -174,11 +174,11 @@ test('Backup safely ignores prototype keys and rejects fractional counters',()=>
  assert.throws(()=>validateBackup({version:1,profiles:[p]}));
 });
 
-test('All 1743 extended facts have correct answers, safe entry, and stable strategy keys',()=>{
- assert.equal(ALL_FACTS.length,1743);assert.equal(new Set(ALL_FACTS.map(f=>f.id)).size,1743);
+test('All 2678 extended facts have correct answers, safe entry, and stable strategy keys',()=>{
+ assert.equal(ALL_FACTS.length,2678);assert.equal(new Set(ALL_FACTS.map(f=>f.id)).size,2678);
  for(const f of ALL_FACTS){
   assert.equal(f.answer,f.op==='add'?f.x+f.y:f.op==='sub'?f.x-f.y:f.op==='mul'?f.x*f.y:f.x/f.y);
-  assert.ok(check(String(f.answer),f.answer));assert.ok(f.answer<=400&&f.answer>=0);
+  assert.ok(check(String(f.answer),f.answer));assert.ok(f.answer<=625&&f.answer>=0);
   const s=strategy(f);assert.match(s.key,/^[a-z0-9-]+$/);assert.ok(s.steps.includes(String(f.answer)));
   for(const key of ['key','title','hint','steps','model'])assert.ok(s[key]&&!/undefined|NaN/.test(s[key]));
  }
@@ -201,7 +201,7 @@ test('All 60 combinations and number limits have the exact intended inverse fami
   for(const f of scope)assert.ok(ops.includes(f.op)&&f.a<=ceiling&&f.b<=ceiling);
   for(const f of ALL_FACTS)assert.equal(scope.includes(f),ops.includes(f.op)&&f.a<=ceiling&&f.b<=ceiling);
  }
- for(const bad of [{ops:[]},{ops:['bogus']},{ceiling:13},{ops:'add'},{ceiling:Infinity}])assert.throws(()=>scopeFacts(bad));
+ for(const bad of [{ops:[]},{ops:['bogus']},{ceiling:26},{ops:'add'},{ceiling:Infinity}])assert.throws(()=>scopeFacts(bad));
 });
 
 test('Every selected fact is eligible immediately for a new learner in both selector modes',()=>{
@@ -231,7 +231,7 @@ test('Selector draws more than three unfamiliar facts and balances all four oper
 test('Every extended fact is reachable without completing any lessons',()=>{
  const p=profile(),seen=new Set();let serial=0;
  for(let round=0;round<Math.ceil(ALL_FACTS.length/5)&&seen.size<ALL_FACTS.length;round++){
-  const s=customSession(p,{ops:OPS,ceiling:20});
+  const s=customSession(p,{ops:OPS,ceiling:25});
   for(let i=0;i<10;i++){
    const f=choose(p,s,base+serial*1000,()=>0.5);assert.ok(f);seen.add(f.id);
    const r=recordAttempt(p,f,{correct:true,now:base+serial++*1000});finishQuestion(s,f,true,r.qualified,r.xp);
@@ -305,6 +305,40 @@ test('Old v1 backups and new strategy lessons retain compatible progress',()=>{
  delete p.serial;delete p.recent;
  for(const r of Object.values(p.records)){delete r.lastSerial;delete r.retryAt;}
  assert.doesNotThrow(()=>validateBackup({version:1,profiles:[p]}));
+});
+
+test('Every valid minimum, maximum and operation combination has exactly the selected facts',()=>{
+ let scopes=0;
+ for(let minimum=0;minimum<=15;minimum++)for(let ceiling=Math.max(1,minimum);ceiling<=25;ceiling++){
+  const width=ceiling-minimum+1,divisors=ceiling-Math.max(1,minimum)+1;
+  for(let mask=1;mask<16;mask++){
+   const ops=OPS.filter((_,i)=>mask&(1<<i)),facts=scopeFacts({ops,minimum,ceiling});
+   const expected=ops.reduce((n,op)=>n+(op==='div'?divisors*width:width*width),0);
+   assert.equal(facts.length,expected);scopes++;
+   for(const f of facts){assert.ok(f.a>=minimum&&f.b>=minimum&&f.a<=ceiling&&f.b<=ceiling);assert.ok(ops.includes(f.op));if(f.op==='div')assert.ok(f.y>0);}
+  }
+ }
+ assert.equal(scopes,4425);
+ for(const bad of [{minimum:16},{minimum:-1},{minimum:1.5},{minimum:10,ceiling:9},{ceiling:0},{ceiling:26},{ceiling:2.5}])assert.throws(()=>scopeFacts(bad));
+});
+
+test('A single-fact range stays playable without awarding immediate-repeat mastery',()=>{
+ const p=profile(),s=customSession(p,{ops:['mul'],minimum:15,ceiling:15});
+ for(let i=0;i<10;i++){
+  const f=choose(p,s,base+i*1000);assert.equal(f.id,'mul:15:15');
+  const r=recordAttempt(p,f,{correct:false,now:base+i*1000});finishQuestion(s,f,false,r.qualified,r.xp);
+ }
+ assert.equal(p.xp,0);assert.equal(p.records['mul:15:15'].run,0);
+});
+
+test('Nonzero minimum survives continuation and maximum facts survive backups',()=>{
+ const p=profile(),s=customSession(p,{ops:OPS,minimum:15,ceiling:25,challenge:true});
+ assert.equal(s.custom.minimum,15);assert.equal(s.custom.ceiling,25);
+ const continued=customSession(p,s.custom);assert.deepEqual(continued.pool,s.pool);
+ for(const f of [BY_ID['mul:25:25'],BY_ID['div:25:25'],BY_ID['add:25:25'],BY_ID['sub:25:25']])attempt(p,f);
+ const copy=validateBackup({version:1,profiles:[p]}).profiles[0];
+ for(const id of ['mul:25:25','div:25:25','add:25:25','sub:25:25'])assert.ok(copy.records[id]);
+ assert.ok(check('625',625));
 });
 
 // Nonfatal audit probes: keep them visible until the owner fixes them.
