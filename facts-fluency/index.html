@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6ed">
+  <meta name="description" content="A quiet, rewarding place to build arithmetic fluency. Learn a strategy, retrieve a fact, and return when it matters.">
+  <title>Fact &amp; Form — Arithmetic fluency</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to practice</a>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="Fact and Form home"><span class="brand-mark" aria-hidden="true">f<span>+</span></span><span>fact <i>&amp;</i> form<small>A LITTLE PRACTICE. A LASTING FOUNDATION.</small></span></a>
+      <div class="profile-tools">
+        <label class="sr-only" for="profileSelect">Current learner</label>
+        <select id="profileSelect" aria-label="Current learner"><option>My practice</option></select>
+        <button class="icon-button" id="addProfile" title="Add a learner" aria-label="Add a learner">+</button>
+        <button class="quiet-button" id="manageBtn">Settings <span aria-hidden="true">↗</span></button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="homeView" aria-labelledby="homeTitle">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="live-dot"></span> YOUR ARITHMETIC WORKSHOP</div>
+            <h1 id="homeTitle">Small facts.<br><em>Big possibilities.</em></h1>
+            <p class="hero-description">Make the basics second nature. Learn a useful strategy, practice a few facts, and let thoughtful review help them stick.</p>
+            <div class="hero-actions"><button class="button button-dark" id="startBtn">Start a practice set <span aria-hidden="true">→</span></button><button class="button button-text" id="diagnosticBtn">Find my starting point</button></div>
+            <p class="session-note" id="sessionNote">A short set. Your own pace. Every correct step counts.</p>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="art-label">THE FOUR BUILDING BLOCKS</div>
+            <div class="operator-grid"><div class="operator op-add">+</div><div class="operator op-sub">−</div><div class="operator op-mul">×</div><div class="operator op-div">÷</div></div>
+            <div class="art-caption"><span class="art-rule"></span> Understanding first. Fluency follows.</div>
+          </div>
+        </div>
+
+        <div class="progress-strip" aria-label="Your learning progress">
+          <div class="progress-item"><span class="metric-icon" aria-hidden="true">↻</span><div><strong id="dueCount">0</strong><span>ready for review</span></div></div>
+          <div class="progress-item"><span class="metric-icon" aria-hidden="true">✦</span><div><strong id="retainedCount">0</strong><span>retained facts</span></div></div>
+          <div class="progress-item"><span class="metric-icon" aria-hidden="true">↗</span><div><strong id="xpCount">0</strong><span>practice XP</span></div></div>
+          <button class="button button-outline" id="reviewBtn">Review what’s due <span aria-hidden="true">→</span></button>
+        </div>
+
+        <section class="curriculum" aria-labelledby="curriculumTitle">
+          <div class="section-heading"><div><div class="eyebrow">THE LEARNING PATH</div><h2 id="curriculumTitle">Build one useful pattern at a time.</h2></div><p><span id="totalFacts">All</span> facts · Four operations<br>Start anywhere. Revisit anything.</p></div>
+          <div id="modules" class="module-grid"></div>
+        </section>
+
+        <details id="guideDetails" class="guide-details">
+          <summary><span>Why this practice works</span><span class="details-plus" aria-hidden="true">+</span></summary>
+          <div id="guide" class="guide-content"><p>First understand a small group of facts. Then retrieve them without help, mix them with familiar facts, and review them after a delay. Progress reflects learning—not just how many questions you finish.</p></div>
+        </details>
+      </section>
+
+      <section id="practiceView" hidden aria-labelledby="practiceTitle">
+        <div class="practice-top"><button class="button button-text" id="backBtn">← Learning path</button><span class="eyebrow" id="modeLabel">PRACTICE</span></div>
+        <div class="practice-shell">
+          <div class="practice-heading"><div><h1 id="practiceTitle">A few facts, well learned.</h1><p id="strategyLabel">Take your time. Accuracy comes first.</p></div><span class="session-count" id="sessionCount">0 / 12</span></div>
+          <label class="sr-only" for="sessionProgress">Practice set progress</label><progress id="sessionProgress" max="12" value="0">0%</progress>
+          <div class="lesson-card" id="lesson" hidden aria-label="Direct instruction"></div>
+          <button class="button button-dark lesson-start" id="lessonStart" hidden>Let’s try it <span aria-hidden="true">→</span></button>
+          <div id="questionArea" class="question-card">
+            <p class="question-prompt" id="prompt">What is the missing number?</p>
+            <div class="equation" id="equation" aria-live="polite">3 + 4 = ?</div>
+            <form id="answerForm" autocomplete="off">
+              <label class="sr-only" for="answerInput">Your answer</label>
+              <div class="answer-row"><input id="answerInput" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="Your answer" placeholder="?" maxlength="5"><button class="button button-dark" id="submitBtn" type="submit">Check <span class="keyboard-hint" aria-hidden="true">↵</span></button></div>
+            </form>
+            <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+            <button class="button button-teal next-button" id="nextBtn" hidden>Next fact <span aria-hidden="true">→</span></button>
+            <div class="keypad" id="keypad" aria-label="Number keypad">
+              <button data-key="1" type="button">1</button><button data-key="2" type="button">2</button><button data-key="3" type="button">3</button>
+              <button data-key="4" type="button">4</button><button data-key="5" type="button">5</button><button data-key="6" type="button">6</button>
+              <button data-key="7" type="button">7</button><button data-key="8" type="button">8</button><button data-key="9" type="button">9</button>
+              <button data-key="back" type="button" aria-label="Delete last digit">⌫</button><button data-key="0" type="button">0</button><button data-key="submit" type="button" class="key-enter" aria-label="Check answer">↵</button>
+            </div>
+            <div class="question-tools"><button class="button button-text" id="hintBtn">Show a hint</button><button class="button button-text" id="lessonBtn">See the strategy</button></div>
+          </div>
+          <div class="practice-bottom"><p>Think first. Answer when you’re ready.</p><button class="button button-text" id="finishBtn">Finish for now</button></div>
+        </div>
+      </section>
+
+      <section id="summaryView" hidden aria-label="Practice set results">
+        <div class="summary-card"><div class="summary-emblem" aria-hidden="true">✦</div><div class="eyebrow">ONE STEP MORE FLUENT</div><div id="summaryContent"></div><div class="summary-actions"><button class="button button-dark" id="continueBtn">Another short set <span aria-hidden="true">→</span></button><button class="button button-outline" id="summaryHomeBtn">Back to the learning path</button></div><p class="summary-footnote">A little, often, is a good way forward.</p></div>
+      </section>
+    </main>
+    <footer class="site-footer"><span>fact <i>&amp;</i> form</span><p>No accounts · On-device saves · No ads</p><small>Made for learning, not just keeping score.</small></footer>
+  </div>
+
+  <dialog id="manageDialog" aria-labelledby="settingsTitle">
+    <div class="dialog-header"><div><div class="eyebrow">YOUR WORKSHOP</div><h2 id="settingsTitle">Learner &amp; settings</h2></div><button class="icon-button" id="closeManage" aria-label="Close settings">×</button></div>
+    <div class="dialog-body">
+      <p class="storage-note">Each learner has separate progress on this browser. Use a backup to move progress to another device. Clearing browser data also clears local progress.</p>
+      <label class="field-label" for="profileName">Learner name</label><div class="field-row"><input id="profileName" type="text" maxlength="40" autocomplete="off"><button class="button button-outline" id="renameBtn">Rename</button></div>
+      <label class="field-label" for="fluencySeconds">Comfortable recall target</label><select id="fluencySeconds"><option value="4">4 seconds</option><option value="6" selected>6 seconds — standard</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="0">Accuracy only — no speed target</option></select><p id="settingsHelp" class="field-help">This is a private learning signal, not a countdown. A correct answer is always correct; slower recall simply gets more practice.</p>
+      <h3>Keep a copy</h3><div class="settings-actions"><button class="button button-outline" id="backupBtn">Export backup ↓</button><label class="button button-outline file-button">Import backup ↑<input type="file" id="importFile" accept="application/json,.json"></label></div>
+      <div class="danger-zone"><h3>Start fresh</h3><p>Individual modules can be reset from their cards on the learning path.</p><div class="settings-actions"><button class="button button-danger" id="resetAllBtn">Reset this learner’s progress</button><button class="button button-text danger-text" id="deleteProfileBtn">Delete learner</button></div></div>
+      <p id="statusMessage" class="field-help" role="status" aria-live="polite"></p>
+    </div>
+  </dialog>
+  <dialog id="factDialog" aria-labelledby="factTitle"><div class="dialog-header"><h2 id="factTitle">A closer look</h2><button class="icon-button" id="closeFacts" aria-label="Close fact details">×</button></div><div class="dialog-body" id="factContent"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>
