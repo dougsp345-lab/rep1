@@ -105,7 +105,9 @@ function sessionFrom(scope,moduleId,mode,profile){
  return {moduleId,mode,number:0,correct:0,independent:0,xp:0,recent:[...(profile?.recent||[])],retry:[],responses:[],pool:scope.map(f=>f.id),introduced:fresh,limit:mode==='diagnostic'?12:10};
 }
 export function customSession(profile,{ops=OPS,ceiling=12,challenge=false}={}){
- const session=sessionFrom(scopeFacts({ops,ceiling}),null,challenge?'challenge':'learn',profile);
+ // The selector is open practice, not a prerequisite-gated lesson.
+ const session=sessionFrom(scopeFacts({ops,ceiling}),null,'practice',profile);
+ session.mode=challenge?'challenge':'practice';
  session.custom={ops:[...new Set(ops)],ceiling,challenge};
  return session;
 }
@@ -121,9 +123,9 @@ export function choose(profile,session,now=Date.now(),random=Math.random){
  const eligible=all.filter(f=>!waiting.has(f.id)&&!(profile.records[f.id]?.retryAt>(profile.serial||0)+1&&now-profile.records[f.id].last<5*60000));
  const retry=session.mode==='challenge'?null:session.retry.find(r=>r.at<=session.number&&eligible.some(f=>f.id===r.id));
  if(retry){session.retry=session.retry.filter(r=>r!==retry);return BY_ID[retry.id];}
- let candidates=eligible.filter(f=>profile.records[f.id]?.attempts||session.introduced.includes(f.id));
+ let candidates=session.custom?eligible:eligible.filter(f=>profile.records[f.id]?.attempts||session.introduced.includes(f.id));
  if(session.mode==='review')candidates=candidates.filter(f=>profile.records[f.id]?.due<=now&&!session.responses.some(r=>r.id===f.id));
- if(session.mode==='challenge')candidates=candidates.filter(f=>(profile.records[f.id]?.run||0)>=3&&!session.responses.some(r=>r.id===f.id));
+ if(session.mode==='challenge')candidates=candidates.filter(f=>(session.custom||(profile.records[f.id]?.run||0)>=3)&&!session.responses.some(r=>r.id===f.id));
  if(!candidates.length)return null;
  // Never silently turn an exhausted review or challenge into a new-fact lesson.
  const spaced=candidates.filter(f=>!session.recent.slice(-2).includes(f.id));
@@ -135,6 +137,9 @@ export function choose(profile,session,now=Date.now(),random=Math.random){
   candidates=candidates.filter(f=>counts[f.op]===least);
  }
  const ranked=candidates.map(f=>{const r=profile.records[f.id],times=session.responses.filter(x=>x.id===f.id).length;
+  // All selected facts can be drawn immediately. Randomize unseen facts;
+  // cycle through previously attempted facts by recency, not mastery.
+  if(session.custom)return {f,score:times*1e15+(r?.last||0)+random()*1e6};
   // Within this set, every eligible fact gets a turn before extra repetitions.
   const priority=!r?.attempts?0:r.due<=now?1:r.run<3?2:3;
   return {f,score:times*1e6+priority*10000+(r?.last||0)/1e11+(r?.run||0)+random()*0.5};

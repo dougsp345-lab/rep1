@@ -138,8 +138,12 @@ This project does not use discovery learning as its teaching method. It does not
 
 The numbered items above record baseline findings and revision requirements. The revision implements the instructional, wording, selection, reward, and persistence changes described in DESIGN.md. Verification is specific, not a declaration of perfection:
 
-- 32 deterministic regression tests pass, covering all 1,743 answers and displayed numerical equations, all 60 scope combinations, eventual fact coverage, introduction limits, spacing, strict reviews, challenge exclusions, resets, and old/new backups.
+- 32 deterministic regression tests pass, covering all 1,743 answers and displayed numerical equations, all 60 scope combinations, eventual fact coverage, guided-lesson introduction limits, spacing, strict reviews, unrestricted selector access, resets, and old/new backups.
 - All 60 operation/ceiling combinations were also checked through the actual browser controls.
 - Browser checks covered learner creation, retained old profiles, a worked 20×20 lesson, wrong-answer correction, the uncredited supported retry, empty selections, empty quick practice, and a complete 10-question mixed round.
 - Narrow-screen CSS, accessible names, focus, contrast, and reduced-motion support were reviewed in code; full mobile-device, enlarged-text, and assistive-technology testing remains outstanding (item 70 and parts of 64/69).
 - Full learner trials and validated prerequisite diagnosis remain future work. The app cannot guarantee comprehension, mastery, or optimal outcomes merely because its software tests pass.
+
+### Subsequent requested adjustment
+
+Choose your practice is now unrestricted: both ordinary and speed-goal rounds can draw any fact in the selected operations/range from the first visit. They do not require prior correct answers, completed lessons, or the guided lessons' three-new-fact limit. Questions appear directly; help and worked corrections remain available. The earlier checklist's known-facts-only quick-practice recommendation is superseded for this selector by the user's explicit preference. Guided lessons and honest progress accounting are unchanged.

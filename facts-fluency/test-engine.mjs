@@ -204,55 +204,48 @@ test('All 60 combinations and number limits have the exact intended inverse fami
  for(const bad of [{ops:[]},{ops:['bogus']},{ceiling:13},{ops:'add'},{ceiling:Infinity}])assert.throws(()=>scopeFacts(bad));
 });
 
-test('Mixed learning introduces all selected operations across short sets without adding more than three new facts',()=>{
- for(let mask=1;mask<16;mask++){
-  const ops=OPS.filter((_,i)=>mask&(1<<i)),p=profile(),seenOps=new Set();
-  for(let round=0;round<3;round++){
-   const s=customSession(p,{ops,ceiling:5}),fresh=new Set();
-   for(let i=0;i<10;i++){
-    const f=choose(p,s,base+round*100000+i*1000,()=>0.5);assert.ok(f);
-    if(!p.records[f.id]?.attempts)fresh.add(f.id);seenOps.add(f.op);
-    assert.ok(ops.includes(f.op)&&f.a<=5&&f.b<=5);
-    const r=recordAttempt(p,f,{correct:true,seconds:2,now:base+round*100000+i*1000});finishQuestion(s,f,true,r.qualified,r.xp);
-   }
-   assert.ok(fresh.size<=3);
+test('Every selected fact is eligible immediately for a new learner in both selector modes',()=>{
+ for(const ceiling of [5,10,12,20])for(let mask=1;mask<16;mask++)for(const challenge of [false,true]){
+  const ops=OPS.filter((_,i)=>mask&(1<<i)),p=profile(),s=customSession(p,{ops,ceiling,challenge}),scope=scopeFacts({ops,ceiling});
+  assert.deepEqual(s.pool,scope.map(f=>f.id));
+  // For each candidate, controlled random scores make it the first draw.
+  for(const target of [scope[0],scope[Math.floor(scope.length/2)],scope.at(-1)]){
+   let i=0;
+   const drawn=choose(p,s,base,()=>scope[i++].id===target.id?0:0.99);
+   assert.equal(drawn.id,target.id);
   }
-  assert.deepEqual([...seenOps].sort(),[...ops].sort());
  }
 });
 
-test('Every extended fact is reached by custom practice; selection cannot starve later facts',()=>{
+test('Selector draws more than three unfamiliar facts and balances all four operations',()=>{
+ for(const challenge of [false,true]){
+  const p=profile(),s=customSession(p,{ops:OPS,ceiling:12,challenge}),seen=new Set(),counts=Object.fromEntries(OPS.map(op=>[op,0]));
+  for(let i=0;i<10;i++){
+   const f=choose(p,s,base+i*1000,()=>0.5);assert.ok(f);assert.ok(!seen.has(f.id));seen.add(f.id);counts[f.op]++;
+   const r=recordAttempt(p,f,{correct:true,now:base+i*1000});finishQuestion(s,f,true,r.qualified,r.xp);
+  }
+  assert.equal(seen.size,10);assert.ok(Math.max(...Object.values(counts))-Math.min(...Object.values(counts))<=1);
+ }
+});
+
+test('Every extended fact is reachable without completing any lessons',()=>{
  const p=profile(),seen=new Set();let serial=0;
- for(let round=0;round<ALL_FACTS.length*2&&seen.size<ALL_FACTS.length;round++){
+ for(let round=0;round<Math.ceil(ALL_FACTS.length/5)&&seen.size<ALL_FACTS.length;round++){
   const s=customSession(p,{ops:OPS,ceiling:20});
   for(let i=0;i<10;i++){
    const f=choose(p,s,base+serial*1000,()=>0.5);assert.ok(f);seen.add(f.id);
-   const r=recordAttempt(p,f,{correct:true,seconds:2,now:base+serial++*1000});finishQuestion(s,f,true,r.qualified,r.xp);
+   const r=recordAttempt(p,f,{correct:true,now:base+serial++*1000});finishQuestion(s,f,true,r.qualified,r.xp);
   }
  }
- assert.equal(seen.size,1743);
+ assert.equal(seen.size,ALL_FACTS.length);
 });
 
-test('Challenge includes only accurate facts, balances operations, and never repeats an item in a set',()=>{
- const p=profile();assert.equal(choose(p,customSession(p,{challenge:true}),base),null);
- for(const f of ALL_FACTS)p.records[f.id]={...newRecord(),attempts:3,correct:3,run:3};
- for(let mask=1;mask<16;mask++){
-  const ops=OPS.filter((_,i)=>mask&(1<<i)),s=customSession(p,{ops,ceiling:20,challenge:true}),seen=new Set(),counts=Object.fromEntries(ops.map(op=>[op,0]));
-  for(let i=0;i<10;i++){const f=choose(p,s,base,()=>0.5);assert.ok(f);assert.ok(!seen.has(f.id));seen.add(f.id);counts[f.op]++;finishQuestion(s,f,true,true,0);}
-  assert.ok(Math.max(...Object.values(counts))-Math.min(...Object.values(counts))<=1);
- }
- const tiny=profile(),f=FACTS[0];tiny.records[f.id]={...newRecord(),attempts:3,correct:3,run:3};
- const s=customSession(tiny,{challenge:true});assert.equal(choose(tiny,s,base).id,f.id);finishQuestion(s,f,true,true,0);assert.equal(choose(tiny,s,base),null);
-});
-
-test('A missed challenge fact leaves the challenge even when its retry becomes ready',()=>{
- const p=profile();for(const f of FACTS)p.records[f.id]={...newRecord(),attempts:3,correct:3,run:3};
- const s=customSession(p,{challenge:true}),missed=choose(p,s,base,()=>0.5);
- const wrong=recordAttempt(p,missed,{correct:false,now:base});finishQuestion(s,missed,false,wrong.qualified,wrong.xp);
- for(let i=0;i<9;i++){
-  const f=choose(p,s,base+(i+1)*1000,()=>0.5);assert.ok(f);assert.notEqual(f.id,missed.id);assert.ok(p.records[f.id].run>=3);
-  const r=recordAttempt(p,f,{correct:true,now:base+(i+1)*1000});finishQuestion(s,f,true,r.qualified,r.xp);
- }
+test('Selector remains open even with many unresolved errors',()=>{
+ const p=profile();
+ for(const f of FACTS.slice(0,20))p.records[f.id]={...newRecord(),attempts:1,errors:1};
+ const s=customSession(p,{ops:OPS,ceiling:12});
+ assert.equal(s.pool.length,663);
+ assert.ok(choose(p,s,base,()=>0.5));
 });
 
 test('Review ends when due facts finish rather than adding unrelated new facts',()=>{
